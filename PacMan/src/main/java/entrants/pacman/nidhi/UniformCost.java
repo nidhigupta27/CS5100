@@ -10,8 +10,9 @@ import pacman.game.Game;
 import pacman.game.GameView;
 import pacman.game.internal.Node;
 
-public class ASTAR {
-	public int ASTAR_Run(int closestPillIndx, int pacmanPosIndx, Game game) {
+public class UniformCost 
+{
+	public int UniformCost_Run(int closestPillIndx, int pacmanPosIndx, Game game) {
 
 		/* Declaration */
 		// Maze graph nodes
@@ -22,12 +23,6 @@ public class ASTAR {
 		int[] color = new int[allNodes.length];
 		// Holding parent node of the child node
 		int[] parent = new int[allNodes.length];
-		// Cost array - An array of cost of reaching a particular node from
-		// source
-		int[] gScore = new int[allNodes.length];
-		// Cost array - An array of heuristic cost of reaching destination node
-		// from a particular node
-		int[] hScore = new int[allNodes.length];
 		// Boolean to indicate that a path to the destination has been found or
 		// not
 		boolean foundPath = false;
@@ -43,31 +38,23 @@ public class ASTAR {
 		GameView.addLines(game, Color.blue, pacmanPosIndx, closestPillIndx);
 
 
-		// Initialize parent, gScore, hScore, color arrays and node queue
+		// Initialize parent, color arrays and node queue
 		// elements
 		for (Node n : allNodes) {
 			NodeQueue obj = new NodeQueue(n.nodeIndex, Integer.MAX_VALUE);
 			allNodesInList.add(obj);
 			parent[n.nodeIndex] = -1;
-			gScore[n.nodeIndex] = Integer.MAX_VALUE;
-			hScore[n.nodeIndex] = Integer.MAX_VALUE;
 			color[n.nodeIndex] = 0; // WHITE
 		}
 		// Start traversing from source node
 		// 1.) Initialize color of source node
 		color[pacmanPosIndx] = 1;// GREY
-		// 2.) Get heuristic distance (hScore) between source and destination
-		// node
-		int shortestDist = game.getShortestPathDistance(pacmanPosIndx,
-				closestPillIndx);
-		// 3.) Get the source Node
+		// 2.) Get the source Node
 		NodeQueue sourceNode = allNodesInList.get(pacmanPosIndx);
-		// 4.) Reset gScore and hScore for source node
-		gScore[pacmanPosIndx] = 0;
-		hScore[pacmanPosIndx] = shortestDist;
-		// 5.) Set FScore for the source Node element
-		sourceNode.setFScore(gScore[pacmanPosIndx] + hScore[pacmanPosIndx]);
-		// 6.) Add source to the Fringe queue
+	
+		// 3.) Set score for the source Node element
+		sourceNode.setFScore(0);
+		// 4.) Add source to the Fringe queue
 		qFringe.add(sourceNode);
 
 		// Loop through nodes until fringe queue is empty
@@ -88,7 +75,7 @@ public class ASTAR {
 			}
 			// Get the neighboring nodes to visit
 			int[] neighbors = game.getNeighbouringNodes(val.getNodeIndex());
-			boolean ghostAtIndex = false;
+			
 			// Loop through all neighbors
 			for (int adjindex : neighbors) {
 				if (color[adjindex] == 0) // WHITE: if node is unseen
@@ -101,15 +88,11 @@ public class ASTAR {
 					//Update the parent of the new node 
 					parent[adjindex] = val.getNodeIndex(); 
                     
-					//Update the gScore of the new node as the cost to reach the node from source node
-					gScore[adjindex] = gScore[val.getNodeIndex()] + game.getShortestPathDistance(val.getNodeIndex(),adjindex);
-					
-					//Update the hScore as the shortest distance from the new node to the destination node
-					int hValue = game.getShortestPathDistance(adjindex,closestPillIndx);					
-					hScore[adjindex] = hValue;
-					
-					//Update the FScore of the new node as the sum of gScore and hScore
-					newNode.setFScore(gScore[adjindex] + hScore[adjindex]);
+					//Update the shortest distance to reach that node from source node
+					int shortestDistToReachNode = val.getFScore() + game.getShortestPathDistance(val.getNodeIndex(),adjindex);
+								
+					//Update the score of the new node 
+					newNode.setFScore(shortestDistToReachNode);
 					//Enqueue the node in Priority Queue
 					qFringe.add(newNode);
 
@@ -118,21 +101,19 @@ public class ASTAR {
 					while (!qFringe.isEmpty()) {
 						NodeQueue updElem = qFringe.poll();
 						if (updElem.getNodeIndex() == adjindex) {
-							//If the gScore of the node already in queue is greater than the gScore of the same node
+							//If the cost to reach the node already in queue is greater than the cosr of the same node
 							//(but reached via a different path), then update the 
-							// 1.gScore of the node 
+							// 1.cost of the node 
 							// 2.the parent
-							// 3.FScore of the node
-							if (gScore[adjindex] > gScore[val.getNodeIndex()]
+						
+							if (updElem.getFScore() > val.getFScore()
 									+ game.getShortestPathDistance(
 											val.getNodeIndex(), adjindex)) {
                            
-								gScore[adjindex] = gScore[val.getNodeIndex()]
-										+ game.getShortestPathDistance(
-												val.getNodeIndex(), adjindex);
 								parent[adjindex] = val.getNodeIndex();
-								updElem.setFScore(gScore[adjindex]
-										+ hScore[adjindex]);
+								updElem.setFScore(val.getFScore()
+										+ game.getShortestPathDistance(
+												val.getNodeIndex(), adjindex));
 							}
 
 						}
@@ -156,5 +137,6 @@ public class ASTAR {
 			return (int) (x.getFScore() - y.getFScore());
 		}
 	};
+
 
 }

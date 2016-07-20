@@ -1,10 +1,8 @@
 package entrants.pacman.nidhi;
 
-public class NodeQueue {
+public class NodeQueue 
+{
 	private int nodeIndx;
-	private int parent;
-	private int gscore;
-	private int hscore;
 	private int fscore;
 	public NodeQueue(int n,int f)
 	{
@@ -24,23 +22,12 @@ public class NodeQueue {
 		nodeIndx = n;
 	}
 	
-	/*public int getGScore(){
-		return gscore;
-	}
-	public void setGScore(int g)
+	public int getFScore()
 	{
-		gscore = g;
-	}
-	public int getHScore(){
-		return hscore;
-	}
-	public void setHScore(int h){
-		hscore = h;		
-	}*/
-	public int getFScore(){
 		return fscore;
 	}
-	public void setFScore(int f){
+	public void setFScore(int f)
+	{
 		fscore = f;		
 	}
 }

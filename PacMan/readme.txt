@@ -1,9 +1,78 @@
-Rules available on our site:
 
-www.pacmanvghosts.co.uk
 
-Change the package names to your username on the site.
+1.Let "b" be the branching factor - possible number of node indexes pacman can move from
+its current nodex. Since the maze is a grid like structure ,b<=4.
 
-Edit the entrants code
+2.Let d be the depth of the tree generated to reach from current nodex and the target node index.
 
-Use the bash script to prepare the zip file for submission (Works on Windows under Git bash)
+3. Let m be the maximum depth of the search space in maze
+
+4. g(n) = cost from start node S to node n
+
+5. C* = cost of optimal solution
+
+6. Stepcost "epsilon" where epsilon>=0
+
+Time complexity of an algorithm is determined by number of nodes generated in the worst case 
+
+Space Complexity is calculated as number of nodes in the queue at any time in the worst case
+
+
+Breadth First Search(BFS)(Uninformed Search)
+
+Time Complexity in BFS
+
+
+BFS will generate :
+1+b+b^2+b^3+................b^d+b^(d+1)-b nodes
+=O(b^(d+1))
+
+
+
+At depth d , there are 0(b^(d+1)) unexpanded nodes in queue.
+
+So the Space complexity is O(b^(d+1))
+
+So BFS has both exponential time and space complexities.
+
+
+A* algorithm(Informed Search)
+
+Time Complexity in A* Alogorithm
+
+Hueristic function h(n) in A* implementation
+
+h(n) = shortest distance to reach from the node (currently evaluating) to destination node index.
+
+Its admissible as h(n)<=h*(n) where h*(n) is the true cost to reach the goal state from n
+
+
+Time complexity in A*
+
+Like BFS,A* will generate 
+1+b+b^2+b^3+................b^d+b^(d+1)-b nodes
+=O(b^(d+1))
+=O(b^d)
+The Space complexity of A* is O(b^m). In worst case,the algorithm keeps all nodes in memory to be able to apply the hueristic and get the least expensive path to destination.
+
+
+Uniform Cost Algorithm(Uninformed Search)
+
+Worst case Time Complexity is:
+
+The total number of nodes generated are 
+1+b+b^2+b^3+................b^d+b^(d+1)-b nodes
+ = O(b^d)
+
+If c* is optimal cost to reach destination and each step gets us epsilon coser to target . 
+The number of steps taken to reach target is [(C*/epsilon)+1]
+
+O(b^[1+floor(C*/epsilon)])
+
+Worst case Space Complexity is:
+
+Like BFS, at depth d , there are 0(b^(d+1)) unexpanded nodes in queue.
+
+where d is approx equal to 1+floor(C*/epsilon)
+
+So the space complexity becomes O(b^[1+floor(C*/epsilon)])
