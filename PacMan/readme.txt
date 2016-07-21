@@ -9,16 +9,16 @@ The project implements three algorithms-
  
 The user can select the algorithm by modifying the value of variable algorithmSelection in MyPacMan.java file
 
-The value of 1 simlates the game in BFS mode
-The value of 2 simulates the game in ASTAR mode
+The value of 1 simulates the game in BFS mode
+The value of 2 simulates the game in A* mode
 The value of 3 simulates the game in Uniform Cost mode
 
 Time and Space Complexities of three Algorithms
 
 
-1.Let "b" be the branching factor - possible number of node indexes pacman can move from its current nodex. Since the maze is a grid like structure ,b<=4.
+1.Let "b" be the branching factor - possible number of node indices pacman can move from its current node index. Since the maze is a grid like structure ,b<=4.
 
-2.Let d be the depth of the tree generated to reach from current nodex and the target node index.
+2.Let d be the depth of the tree generated to reach from current node index to the target node index.
 
 3. Let m be the maximum depth of the search space in maze
 
@@ -51,8 +51,6 @@ So BFS has both exponential time and space complexities.
 
 
 A* algorithm(Informed Search)
-
-Time Complexity in A* Alogorithm
 
 Hueristic function h(n) in A* implementation
 
