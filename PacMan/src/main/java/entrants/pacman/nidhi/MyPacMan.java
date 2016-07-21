@@ -29,7 +29,7 @@ public class MyPacMan extends PacmanController
 	// A value of 1 selects BFS
 	// A value of 2 selects ASTAR
 	// A value of 3 selects UniformCost
-    private int algorithmSelection = 2;
+    private int algorithmSelection = 1;
     
     private int targetIndx = -1;
 
