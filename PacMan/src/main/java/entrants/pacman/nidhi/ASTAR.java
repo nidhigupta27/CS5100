@@ -58,8 +58,8 @@ public class ASTAR {
 		color[pacmanPosIndx] = 1;// GREY
 		// 2.) Get heuristic distance (hScore) between source and destination
 		// node
-		int shortestDist = game.getShortestPathDistance(pacmanPosIndx,
-				closestPillIndx);
+		int shortestDist = game.getShortestPathDistance(pacmanPosIndx, closestPillIndx);
+        
 		// 3.) Get the source Node
 		NodeQueue sourceNode = allNodesInList.get(pacmanPosIndx);
 		// 4.) Reset gScore and hScore for source node
@@ -73,7 +73,6 @@ public class ASTAR {
 		// Loop through nodes until fringe queue is empty
 		while (!qFringe.isEmpty()) {
 			NodeQueue val = qFringe.poll();
-			// System.out.println("Head of queue"+val.getNodeIndex());
 			int lastindex = val.getNodeIndex();
 			// If the destination node is reached then trace back the path
 			// to the node whose parent is the source node. Return the
@@ -88,7 +87,7 @@ public class ASTAR {
 			}
 			// Get the neighboring nodes to visit
 			int[] neighbors = game.getNeighbouringNodes(val.getNodeIndex());
-			boolean ghostAtIndex = false;
+		
 			// Loop through all neighbors
 			for (int adjindex : neighbors) {
 				if (color[adjindex] == 0) // WHITE: if node is unseen
