@@ -26,7 +26,7 @@ Time and Space Complexities of three Algorithms
 
 5. C* = cost of optimal solution
 
-6. Stepcost "epsilon" where epsilon>=0
+6. Stepcost "epsilon" where epsilon>0
 
 Time complexity of an algorithm is determined by number of nodes generated in the worst case 
 
