@@ -1,0 +1,10 @@
+footpath(59,60).
+footpath(57,59).
+footpath(59,60).
+footpath(56,57).
+footpath(58,59).
+footpath(54,53).
+footpath(53,52).
+footpath(83,65).
+footpath(65,68).
+motorway(56,54).
