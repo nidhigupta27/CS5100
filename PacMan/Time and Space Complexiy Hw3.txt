@@ -36,15 +36,15 @@ In worst case MinMax will generate :
 
 1(at depth 0)+ 4+4*(3^4)(at depth 1)+ (4*3^4)*4+ ((4*3^4)*4)*3^4 (depth 2)+........+4*(4*3^4)^(d-1)*4+(4*3^4)^d(for d max and min moves)
 
-Time complexity is exponential O(4b^(d-1)+b^d) where d(a.k.a ply) is depth of state space tree
+Time complexity is exponential O(b^(d-1)+b^d) which is asymptotically same as O(b^d)where d(a.k.a ply) is depth of state space tree
 and b = (4*(3^4))
 
-At depth d , there are 0(b^d) unexpanded nodes in tree.
+At depth d , there are 0(b*d) unexpanded nodes in tree.
 
-So the Space complexity is O(b^d))where d(a.k.a ply) is depth of state space tree
+So the Space complexity is O(b*d))where d(a.k.a ply) is depth of state space tree
 and b = (4*(3^4))
 
-So MinMax has both exponential time and space complexities.
+So MinMax has exponential time and linear space complexity.
 
 
 Alpha Beta Pruning algorithm
@@ -52,10 +52,10 @@ Alpha Beta Pruning algorithm
 Alpha Beta algorithm can reduce the branch factor by sqrt(b)(for PacMan) or sqrt(b')(for ghost) and depends greatly on the 
 ordering in which successor nodes are examined.
 
-In the worst case Alpha Beta has the same time and space complexity as MinMax algorithm O(b^d) where d(a.k.a ply) is depth of state space tree
+In the worst case Alpha Beta has the same time and space complexity as MinMax algorithm O(b^d) and O(b*d) respectively where d(a.k.a ply) is depth of state space tree
 and b = (4*(3^4))
 However if the successor move are chosen in way that always the best move(node which maximizes PacMan score if Max or Minimizes PacMan score if Min node)
 is selected as the first alternative, we examine only (2b)^(d/2) leaf nodes at each depth of the tree.
 
-Hence the space and time complexities become O((2b)^(d/2)) where d(a.k.a ply) is depth of state space tree
+Hence the time complexity become O((2b)^(d/2)) where d(a.k.a ply) is depth of state space tree
 and b = (4*(3^4))
