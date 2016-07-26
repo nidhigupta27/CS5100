@@ -35,8 +35,7 @@ public class BFS
     	for(Node n : allNodes)
     	{
     		color[n.nodeIndex] = 0 ; //WHITE
-    		parent[n.nodeIndex]= -1;
-    		
+    		parent[n.nodeIndex]= -1;    		
     	}
     	
     	// Start traversing from source node
