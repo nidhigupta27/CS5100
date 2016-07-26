@@ -1,0 +1,57 @@
+
+The project implements two algorithms-
+
+   1.MinMax Algorithm
+
+   2. Alpha Beta Pruning Algorithm
+
+   
+ 
+The user can select the algorithm by modifying the value of variable algorithmSelection in MyPacManII.java file
+
+The value of 1 simulates the game in MinMax mode
+The value of 2 simulates the game in AplhaBeta Pruning mode
+
+Time and Space Complexities of two Algorithms
+
+
+1.Let "b" be the branching factor - possible number of node moves pacman can take. Since the maze is a grid like structure ,b<=4.
+
+2. Let d be the ply (or the depth of the game state space).
+
+3. Let "b'" be the branching factor - possible number of node moves ghost can take. Since there are four ghost and each can make
+a maximum of 3 moves the branch factor become 3^4
+
+Time complexity of an algorithm is determined by number of nodes generated in the worst case 
+
+Space Complexity is calculated as number of nodes in the queue at any time in the worst case
+
+
+MinMax
+
+Time Complexity in MinMax
+
+
+In worst case MinMax will generate :
+1+4(at depth 1)+4*3^4(at depth 2)+ 4*4*3^4+........4^(d-1)*3^4
+
+Time complexity is exponential O(b^(d-1)) where d is depth of state space tree
+
+
+At depth d , there are 0(b^(d-1)) unexpanded nodes in tree.
+
+So the Space complexity is O(b^(d-1))
+
+So MinMax has both exponential time and space complexities.
+
+
+Apha Beta Pruning algorithm
+
+Alpha Beta algorithm can reduce the branch factor by sqrt(b)(for PacMan) or sqrt(b')(for ghost) and depends greatly on the 
+ordering in which successor nodes are examined.
+
+In the worst case Alpha Beta has the same time and space complexity as MinMax algorithm O(b^d)
+However if the successor nodes are chosen in way that the always the best move(node which maximizes PacMan score if Max or Minimizes PacMan scor if Min node)
+is selected as the first alternative, we examine only (2b)^(d/2) leaf nodes at each depth of the tree.
+
+Hence the space and time complexities become O((2b)^(d/2))
