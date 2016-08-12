@@ -19,13 +19,15 @@ public class DecisionTree {
 		InformationRatio ir = new InformationRatio();
 		for(WeatherData wd : XtrainData)
 		{
+			//System.out.println("the inf ratio is");
 			ArrayList<Feature> frs = wd.getFeatures();
 		    for(Feature f : frs)
 		    {
-		    	if(f.getName() == "Mean TemperatureF")
+		    	if(f.getName().equals("Mean TemperatureF"))
 		    	{
+		    		System.out.println("the feature is"+f.getName());
 		    		double gainr = ir.calcInformationRatio(XtrainData,YtrainData,f);
-		    		System.out.println("the inf ratio is"+gainr);
+		    		//System.out.println("the inf ratio is"+gainr);
 		    		break;
 		    	}
 		    }

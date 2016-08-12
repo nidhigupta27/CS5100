@@ -168,15 +168,18 @@ public class InformationRatio
 	private int getCountsOfRain(HashMap<Integer,WeatherData> trainYData,boolean isRain,int total_cnt)
 	{
 		int rainYesCount = 0;
+		System.out.println("Inside trainYdata"+ trainYData.size());
 		for(int i=0;i<trainYData.size();i++)
 		{
 			WeatherData wd = trainYData.get(i);
+			System.out.println("Inside trainYdata1"+wd);
 			ArrayList<Feature> frs = wd.getFeatures();
+			
 			List fr_vals = frs.get(0).getValues();
 			for(int j=0;j<fr_vals.size();j++)
 			{
 				String fr_val = (String)fr_vals.get(i);
-				if(fr_val == "Rain")
+				if(fr_val.equals("Rain"))
 				{
 					  rainYesCount++;				  
 				}
