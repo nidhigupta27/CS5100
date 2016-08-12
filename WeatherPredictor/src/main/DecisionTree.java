@@ -2,6 +2,7 @@ package main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Scanner;
 
@@ -14,7 +15,24 @@ public class DecisionTree {
 		HashSet<WeatherData> YtrainData = readData("weatherDataTrain.txt",false);
 		HashSet<WeatherData> XtestData  = readData("weatherDataTest.txt",true);
 		HashSet<WeatherData> YtestData  = readData("weatherDataTest.txt",false);
-		for(WeatherData wd : YtestData)
+		
+		InformationRatio ir = new InformationRatio();
+		for(WeatherData wd : XtrainData)
+		{
+			ArrayList<Feature> frs = wd.getFeatures();
+		    for(Feature f : frs)
+		    {
+		    	if(f.getName() == "Mean TemperatureF")
+		    	{
+		    		double gainr = ir.calcInformationRatio(XtrainData,YtrainData,f);
+		    		System.out.println("the inf ratio is"+gainr);
+		    		break;
+		    	}
+		    }
+			//ir.calcInformationRatio(trainDataX,trainDataY,)
+		}
+		
+		/*for(WeatherData wd : YtestData)
 		{
 			for(Feature fd: wd.getFeatures())
 			{
@@ -22,7 +40,7 @@ public class DecisionTree {
 				System.out.println(fd.getValues());
 			}
 			break;
-		}
+		}*/
 	}
 
 	private static HashSet<WeatherData> readData(String filename,boolean isX) {
