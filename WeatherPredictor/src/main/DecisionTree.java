@@ -27,21 +27,22 @@ public class DecisionTree {
 		    	{
 		    		System.out.println("the feature is"+f.getName());
 		    		double gainr = ir.calcInformationRatio(XtrainData,YtrainData,f);
-		    		//System.out.println("the inf ratio is"+gainr);
-		    		break;
+		    		System.out.println("the inf ratio is"+gainr);
+		    	
 		    	}
 		    }
+		    break;
 			//ir.calcInformationRatio(trainDataX,trainDataY,)
 		}
 		
-		/*for(WeatherData wd : YtestData)
+		/*for(WeatherData wd : YtrainData)
 		{
 			for(Feature fd: wd.getFeatures())
 			{
 				System.out.println(fd.getName());
 				System.out.println(fd.getValues());
 			}
-			break;
+			
 		}*/
 	}
 
