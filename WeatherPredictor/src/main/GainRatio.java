@@ -21,12 +21,12 @@ public class GainRatio
   private double partitionPoint;
   private double gainRatio = roundoff(Double.MIN_VALUE);
   private double maxGainRatioFeatureValue;
-  private HashMap<Integer,WeatherData> XDataInTrain = new HashMap<Integer,WeatherData>();
+  private HashMap<Integer,WeatherData> XDataInTrain = new LinkedHashMap<Integer,WeatherData>();
   private HashMap<Integer,WeatherData>xTrainLeftPart;
   private HashMap<Integer,WeatherData>xTrainRightPart;
   private HashMap<Integer,WeatherData>yTrainLeftPart;
   private HashMap<Integer,WeatherData>yTrainRightPart;
-  private HashMap<Integer,WeatherData> YDataInTrain = new HashMap<Integer,WeatherData>();
+  private HashMap<Integer,WeatherData> YDataInTrain = new LinkedHashMap<Integer,WeatherData>();
   private ArrayList<Integer> keys = new ArrayList<Integer>();
   public GainRatio(HashMap<Integer,WeatherData> trainDataX,HashMap<Integer,WeatherData> trainDataY,
 		                              Feature attribute,String target_val) throws IOException
@@ -49,7 +49,7 @@ public class GainRatio
 		  }  
 	  
 	  
-		  for(int i=0;i<keys.size();i++)
+		  for(int i=0;i<keys.size()-1;i++)
 		  {  
 			  WeatherData wd1  =   XDataInTrain.get(keys.get(i));
 			  WeatherData wd2  =   XDataInTrain.get(keys.get(i+1));
@@ -95,10 +95,10 @@ public class GainRatio
           }
 	      
        // Initialize the left and right partitions
-  		xTrainLeftPart = new HashMap<Integer, WeatherData>();
-  		xTrainRightPart = new HashMap<Integer, WeatherData>();
-  		yTrainLeftPart = new HashMap<Integer, WeatherData>();
-  		yTrainRightPart = new HashMap<Integer, WeatherData>();
+  		xTrainLeftPart = new LinkedHashMap<Integer, WeatherData>();
+  		xTrainRightPart = new LinkedHashMap<Integer, WeatherData>();
+  		yTrainLeftPart = new LinkedHashMap<Integer, WeatherData>();
+  		yTrainRightPart = new LinkedHashMap<Integer, WeatherData>();
   		
   		for(int i=0;i<=partitionPos;i++)
   		{
@@ -145,7 +145,7 @@ public class GainRatio
 	            int count_target_no_part = 0;	
 	            double prob_yes_target_part = 0.0;
 	    		double prob_no_target_part = 0.0;
-	            HashMap<Integer,WeatherData> yTrainInPartition = new HashMap<Integer,WeatherData>();
+	            HashMap<Integer,WeatherData> yTrainInPartition = new LinkedHashMap<Integer,WeatherData>();
 	            for(int i=startIndex;i<part_size;i++)
 	            {
 	            	yTrainInPartition.put(keys.get(i), YDataInTrain.get(keys.get(i)));
@@ -252,7 +252,7 @@ public class GainRatio
 	}
   private HashMap<Integer,WeatherData> getSortedTrain(HashMap<Integer,Double>XDataTrainAttrbMap,HashMap<Integer,WeatherData> dataInTrain)
   {
-	  HashMap<Integer,WeatherData> trainData = new HashMap<Integer,WeatherData>(); 
+	  HashMap<Integer,WeatherData> trainData = new LinkedHashMap<Integer,WeatherData>(); 
 	  for(Map.Entry<Integer, Double> key_FeatureVal : XDataTrainAttrbMap.entrySet())
 	  {
 		  WeatherData wd = dataInTrain.get(key_FeatureVal.getKey());
@@ -270,8 +270,11 @@ public class GainRatio
 		 ArrayList<Feature> features = wd.getFeatures();
 		 for(Feature f : features)
 		 {
-			 if(f.getName().equals(attrb.getName()))
+			 if(f.getName().contains(attrb.getName()))
 			 {
+				 
+				 //System.out.println("The feature val"+(String)f.getValues().get(0));
+				 //System.out.println("The feature name"+f.getName());
 				 Double feature_val = Double.parseDouble((String)f.getValues().get(0));
 				 XDataTrainAttrbMap.put(key_weatherData.getKey(),feature_val);
 			 }

@@ -22,6 +22,7 @@ public class SelectFeature
 		   {
 	             feature = null;
 	             gainRatio = Double.MIN_VALUE;
+	             System.out.println("the min double"+gainRatio);
 	             xTrainLeftPart = null;
 	             xTrainRightPart = null;
 	             yTrainLeftPart = null;

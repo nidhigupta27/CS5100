@@ -101,6 +101,10 @@ public class WeatherData {
 				}
 				else {
 					Object featureObj = feature;
+					if (feature.isEmpty())
+					{
+						feature = "0";
+					}
 					List<Object> val = new ArrayList<Object>();
 					val.add(feature);
 					features.add(new Feature<Object> (val,featureNames.get(i) ));
