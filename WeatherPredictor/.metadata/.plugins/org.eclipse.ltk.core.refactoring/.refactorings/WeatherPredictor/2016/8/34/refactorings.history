@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename compilation unit &apos;main.GainRaio.java&apos; to &apos;GainRatio.java&apos;&#x0D;&#x0A;- Original project: &apos;WeatherPredictor&apos;&#x0D;&#x0A;- Original element: &apos;main.GainRaio.java&apos;&#x0D;&#x0A;- Renamed element: &apos;main.GainRatio.java&apos;" description="Rename compilation unit &apos;GainRaio.java&apos;" flags="2" id="org.eclipse.jdt.ui.rename.compilationunit" input="/src&lt;main{GainRaio.java" name="GainRatio.java" references="false" stamp="1471136710491" version="1.0"/>
+</session>

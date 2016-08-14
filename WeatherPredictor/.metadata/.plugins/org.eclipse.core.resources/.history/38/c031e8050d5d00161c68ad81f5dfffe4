@@ -1,0 +1,68 @@
+package main;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.HashSet;
+import java.util.Scanner;
+
+import util.Feature;
+import util.WeatherData;
+
+public class DecisionTree {
+	public static void main(String args[]) {
+		HashSet<WeatherData> XtrainData = readXData("weatherDataTrain.txt");
+		HashSet<WeatherData> YtrainData = readYData("weatherDataTrain.txt");
+		HashSet<WeatherData> XtestData  = readXData("weatherDataTest.txt");
+		HashSet<WeatherData> YtestData  = readYData("weatherDataTest.txt");
+		for(WeatherData wd : XtrainData)
+		{
+			for(Feature fd: wd.getFeatures())
+			{
+				System.out.println(fd.getName());
+				System.out.println(fd.getValues());
+				break;
+			}
+		}
+	}
+
+	private static HashSet<WeatherData> readXData(String filename) {
+		HashSet<WeatherData> data = new HashSet<WeatherData>();
+		Scanner scanner = null;
+		try {
+			scanner = new Scanner(new File(filename));
+		} catch (FileNotFoundException exception) {
+			System.out.println("Error: File not found");
+			System.exit(1);
+		}
+		String line;
+		String firstLine = scanner.nextLine(); 
+		while (scanner.hasNextLine()) {
+			line = scanner.nextLine();
+			WeatherData newData = new WeatherData();
+			newData.addFeatureNamesToXData(firstLine);
+			newData.addFeaturesToXData(line);
+			data.add(newData);
+		}
+		return data;
+	}
+	private static HashSet<WeatherData> readYData(String filename) {
+		HashSet<WeatherData> data = new HashSet<WeatherData>();
+		Scanner scanner = null;
+		try {
+			scanner = new Scanner(new File(filename));
+		} catch (FileNotFoundException exception) {
+			System.out.println("Error: File not found");
+			System.exit(1);
+		}
+		String line;
+		String firstLine = scanner.nextLine(); 
+		while (scanner.hasNextLine()) {
+			line = scanner.nextLine();
+			WeatherData newData = new WeatherData();
+			newData.addFeatureNamesToYData(firstLine);
+			newData.addFeaturesToYData(line);
+			data.add(newData);
+		}
+		return data;
+	}
+}

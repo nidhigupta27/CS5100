@@ -1,0 +1,193 @@
+package main;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import util.Feature;
+import util.WeatherData;
+
+public class GainRatio 
+{
+  private Feature feature2consider;
+  private double partitionPoint;
+  private double gainRatio = roundoff(Double.MIN_VALUE);
+  private HashMap<Integer,WeatherData> XDataInTrain = new HashMap<Integer,WeatherData>();
+  private HashMap<Integer,WeatherData> YDataInTrain = new HashMap<Integer,WeatherData>();
+  private ArrayList<Integer> keys = new ArrayList<Integer>();
+  public GainRatio(HashMap<Integer,WeatherData> trainDataX,HashMap<Integer,WeatherData> trainDataY,
+		                              Feature attribute,String target_val) throws IOException
+  {
+	  this.feature2consider = attribute;
+	  this.XDataInTrain = trainDataX;
+	  this.YDataInTrain = trainDataY;
+	  HashMap<Integer,Double> XDataTrainAttrbMap = new LinkedHashMap<Integer,Double>();
+	  XDataTrainAttrbMap = getHashByAttrib(XDataInTrain,attribute);
+	  XDataTrainAttrbMap = sortByValue(XDataTrainAttrbMap);
+	  this.XDataInTrain = getSortedTrain(XDataTrainAttrbMap,this.XDataInTrain);
+	  this.YDataInTrain = getSortedTrain(XDataTrainAttrbMap,this.YDataInTrain);
+	  int partitionPos = 0;
+	  double information_gain_System = roundoff(getInformationGainSystem(trainDataY,target_val));
+	  
+	  // Make an arraylist of keys
+	  for(Map.Entry<Integer, Double> key_weatherData : XDataTrainAttrbMap.entrySet())
+	  {
+		  keys.add(key_weatherData.getKey()); 
+	  }  
+	  
+	  
+		  for(int i=0;i<keys.size();i++)
+		  {  
+			  WeatherData wd1  =   XDataInTrain.get(keys.get(i));
+			  WeatherData wd2  =   XDataInTrain.get(keys.get(i+1));
+			  ArrayList<Feature> featureData1 = wd1.getFeatures();
+			  ArrayList<Feature> featureData2 = wd2.getFeatures();
+			  Double feature_Val1=0.0;
+			  Double feature_Val2=0.0;
+			  for(Feature f : featureData1)
+			  {
+				  if(f.getName().equals(feature2consider.getName()))
+					{
+						feature_Val1 = Double.parseDouble((String)f.getValues().get(0));
+					}
+			  }
+			  for(Feature f : featureData2)
+			  {
+				  if(f.getName().equals(feature2consider.getName()))
+					{
+						feature_Val2 = Double.parseDouble((String)f.getValues().get(0));
+					}
+			  }
+			  if(feature_Val1 != feature_Val2)
+			  {
+				  double gainRatio = calculateGainRatio(information_gain_System,feature2consider, target_val, XDataInTrain,YDataInTrain, i);
+				  
+			  }
+			  
+		  }
+		  
+			  
+		   
+  }
+  private double getInformationGainSystem(HashMap<Integer,WeatherData> trainDataY,String target_val)
+  {
+	  double systemInfGain = 0.0;
+	  int total_count_in_train = trainDataY.size();
+	  int count_target_yes = 0;
+	  int count_target_no = 0;
+	  double x = 0.0;
+	  double y = 0.0;
+      //Calculates the number of records in train data with EVENT=RAIN
+       count_target_yes = getCountsOfTarget(trainDataY,target_val);
+    	//System.out.println("Number of entries with Rain yes"+count_rain_yes);
+    	//Calculates the number of records in train data with EVENT!=RAIN		
+       count_target_no =  total_count_in_train - count_target_yes;
+        //System.out.println("Number of entries with Rain no"+count_rain_no);
+        
+        //Probability that target occurred in train dataset
+       x = (double)count_target_yes/total_count_in_train;
+        //System.out.println("prob of  Rain in train"+x);
+       
+       //Probability that target did not occur in train dataset
+       y = (double)count_target_no/total_count_in_train;
+  
+        
+       //The information gain of the entire training set
+      double information_gain_System = roundoff(getInformationGain(x,y));
+	  
+      return systemInfGain;
+  }
+  private int getCountsOfTarget(HashMap<Integer,WeatherData> trainYData,String target)
+	{
+		int rainYesCount = 0;
+		for (Map.Entry<Integer, WeatherData> key_weatherData : trainYData.entrySet()) 
+		{
+			WeatherData wd = (WeatherData) key_weatherData.getValue();
+		
+			ArrayList<Feature> frs = wd.getFeatures();
+			
+			List fr_vals = frs.get(0).getValues();
+			for(int j=0;j<fr_vals.size();j++)
+			{
+				String fr_val = fr_vals.get(j).toString();
+				if(fr_val.contains(target))
+				{
+					  rainYesCount++;				  
+				}				
+			}			
+		}
+        return rainYesCount;		
+	}
+	private double getInformationGain(double x,double y)
+	{
+		double log_x = log(x,2);
+		double log_y = log(y,2);
+		double info_gain = -((x*log_x)+(y*log_y));
+		return info_gain;
+	}
+	private double log(double x, int base)
+	{
+	    return (Math.log(x) / Math.log(base));
+	}
+  private HashMap<Integer,WeatherData> getSortedTrain(HashMap<Integer,Double>XDataTrainAttrbMap,HashMap<Integer,WeatherData> dataInTrain)
+  {
+	  HashMap<Integer,WeatherData> trainData = new HashMap<Integer,WeatherData>(); 
+	  for(Map.Entry<Integer, Double> key_FeatureVal : XDataTrainAttrbMap.entrySet())
+	  {
+		  WeatherData wd = dataInTrain.get(key_FeatureVal.getKey());
+		  trainData.put(key_FeatureVal.getKey(), wd);
+		  
+	  }
+	  return trainData;
+  }
+  private HashMap<Integer,Double> getHashByAttrib(HashMap<Integer,WeatherData> XDataInTrain,Feature attrb)
+  {
+	  HashMap<Integer,Double> XDataTrainAttrbMap = new HashMap<Integer,Double>();
+	  for(Map.Entry<Integer, WeatherData> key_weatherData : XDataInTrain.entrySet())
+	  {		  
+		 WeatherData wd =  key_weatherData.getValue();
+		 ArrayList<Feature> features = wd.getFeatures();
+		 for(Feature f : features)
+		 {
+			 if(f.getName().equals(attrb.getName()))
+			 {
+				 Double feature_val = Double.parseDouble((String)f.getValues().get(0));
+				 XDataTrainAttrbMap.put(key_weatherData.getKey(),feature_val);
+			 }
+		 }
+	  }
+	  return XDataTrainAttrbMap;
+	  
+  }
+  public static <K, V extends Comparable<? super V>> HashMap<K, V> sortByValue( HashMap<K, V> map )
+  {
+      List<Map.Entry<K, V>> list =
+          new LinkedList<Map.Entry<K, V>>( map.entrySet() );
+      Collections.sort( list, new Comparator<Map.Entry<K, V>>()
+      {
+          public int compare( Map.Entry<K, V> o1, Map.Entry<K, V> o2 )
+          {
+              return (o1.getValue()).compareTo( o2.getValue() );
+          }
+      } );
+
+      HashMap<K, V> result = new LinkedHashMap<K, V>();
+      for (HashMap.Entry<K, V> entry : list)
+      {
+          result.put( entry.getKey(), entry.getValue() );
+      }
+      return result;
+  }
+  private double roundoff(double num_2_round)
+  {
+		return (double)Math.round(num_2_round * 100000d) / 100000d;
+   }
+}

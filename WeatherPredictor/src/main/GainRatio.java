@@ -39,9 +39,24 @@ public class GainRatio
 		  XDataTrainAttrbMap = sortByValue(XDataTrainAttrbMap);
 		  this.XDataInTrain = getSortedTrain(XDataTrainAttrbMap,this.XDataInTrain);
 		  this.YDataInTrain = getSortedTrain(XDataTrainAttrbMap,this.YDataInTrain);
+		  //Testing purpose
+		  /*for(Map.Entry<Integer, WeatherData> key_weatherData : XDataInTrain.entrySet())
+		  {
+			  WeatherData wd = key_weatherData.getValue();
+			  ArrayList<Feature> fet = wd.getFeatures();
+			  for(Feature f : fet)
+			  {
+				  if(f.getName().equals(feature2consider.getName()))
+				  {
+					  Double fval = Double.parseDouble((String)f.getValues().get(0));
+					  System.out.println("the sorted order is"+f.getName()+" "+fval);
+				  }
+			  }
+		  }*/
+		  
 		  int partitionPos = 0;
 		  double information_gain_System = roundoff(getInformationGainSystem(trainDataY,target_val));
-		  
+		  //System.out.println("the inf gain of system"+information_gain_System);
 		  // Make an arraylist of keys
 		  for(Map.Entry<Integer, Double> key_weatherData : XDataTrainAttrbMap.entrySet())
 		  {
@@ -73,9 +88,12 @@ public class GainRatio
 			  }
 			  if(feature_Val1 != feature_Val2)
 			  {
+				  //System.out.println("I am here");
 				  double currGainRatio = roundoff(calculateGainRatio(information_gain_System,feature2consider, target_val, XDataInTrain,YDataInTrain,i));
+				 // System.out.println("the new gain ratio"+currGainRatio);
 				  if (currGainRatio > gainRatio ) 
 				  {
+					 // System.out.println("the new gain ratio"+currGainRatio);
 					    gainRatio = currGainRatio;
 					    partitionPos = i;
 				  }
@@ -121,9 +139,16 @@ public class GainRatio
 	        int lPart = i+1;
 	        int rPart = YDataInTrain.size()-i-1;
 	        double gainLPart = calcGain(target_val,lPart,YDataInTrain,0);
+	        //System.out.println("the gain from left part"+gainLPart);
 	        double gainRPart = calcGain(target_val,rPart,YDataInTrain,i+1);
+	        //System.out.println("the gain from right part"+gainRPart);
 	        double gainFromPart  =  information_gain_System -(gainLPart+gainRPart);
 	         //Split information of partition
+	        //Test
+	        if((lPart==0)||(rPart==0))
+	        {
+	        	System.out.println("This cannot be the case!");
+	        }
 			if((lPart!=0) && (rPart!=0))
 			{		
 				double splitInfoFromPartition = getInformationGain(((double)lPart/XDataInTrain.size()),
@@ -172,10 +197,10 @@ public class GainRatio
 			  double y = 0.0;
 		      //Calculates the number of records in train data with EVENT=RAIN
 		       count_target_yes = getCountsOfTarget(trainDataY,target_val);
-		    	//System.out.println("Number of entries with Rain yes"+count_rain_yes);
+		    	//System.out.println("Number of entries with Rain yes"+count_target_yes);
 		    	//Calculates the number of records in train data with EVENT!=RAIN		
 		       count_target_no =  total_count_in_train - count_target_yes;
-		        //System.out.println("Number of entries with Rain no"+count_rain_no);
+		        //System.out.println("Number of entries with Rain no"+count_target_no);
 		        
 		        //Probability that target occurred in train dataset
 		       x = (double)count_target_yes/total_count_in_train;
@@ -183,11 +208,11 @@ public class GainRatio
 		       
 		       //Probability that target did not occur in train dataset
 		       y = (double)count_target_no/total_count_in_train;
-		  
+		       //System.out.println("prob of  not Rain in train"+x);
 		        
 		       //The information gain of the entire training set
-		      double information_gain_System = roundoff(getInformationGain(x,y));
-			  
+		      systemInfGain = roundoff(getInformationGain(x,y));
+		     
 		      return systemInfGain;
   }
   public Feature getFeature()

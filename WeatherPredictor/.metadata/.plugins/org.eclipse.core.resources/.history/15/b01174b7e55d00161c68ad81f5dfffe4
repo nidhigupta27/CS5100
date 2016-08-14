@@ -1,0 +1,63 @@
+package main;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import util.Feature;
+import util.WeatherData;
+
+public class InformationRatio 
+{
+	private HashMap<Integer,WeatherData> trainDataXMap = new HashMap<Integer,WeatherData>();
+	private HashMap<Integer,WeatherData> trainDataYMap = new HashMap<Integer,WeatherData>();
+    
+	private  void calcInformationRatio(HashSet<WeatherData> trainDataX,HashSet<WeatherData> trainDataY,Feature attribute)
+    {
+    	int i=0;
+    	for(WeatherData wd : trainDataX)
+    	{
+    		i++;
+    		trainDataXMap.put(i, wd);    		
+    	}
+    	for(WeatherData wd : trainDataY)
+    	{
+    		i++;
+    		trainDataYMap.put(i, wd);    		
+    	}
+    	HashMap<Integer,WeatherData> trainDataXMap_sorted = sort_trainingData(trainDataXMap,attribute);
+    	   	
+    }
+	private HashMap<Integer,WeatherData> sort_trainingData(HashMap<Integer,WeatherData> trainDataXMap,Feature attrb)
+	{
+		Set<Entry<Integer, WeatherData>> set = trainDataXMap.entrySet();
+        List<Entry<Integer, WeatherData>> list = new ArrayList<Entry<Integer, WeatherData>>(set);
+        Collections.sort( list, new Comparator<Map.Entry<Integer,WeatherData>>()
+        {
+            public int compare( Map.Entry<Integer,WeatherData> o1, Map.Entry<Integer,WeatherData> o2 )
+            {
+            	for(Feature wd : o1.getValue().getFeatures())
+            	{
+            		   if(wd.getName()=="Mean Temperature")
+            		   {
+            			   ArrayList<Feature> o2Features = o2.getValue().getFeatures();
+            			   for(Feature f : o2Features)
+            			   {
+            				   if(f.getName()=="Mean Temperature") {
+            				   return (f.getValues().compareTo(wd.getValues());
+            				   }
+            			   }
+            			   
+            		   }
+            	}
+                
+            }
+        } );
+	}
+}
