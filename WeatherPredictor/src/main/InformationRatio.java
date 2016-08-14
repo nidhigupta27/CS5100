@@ -31,6 +31,8 @@ public class InformationRatio
     	boolean isRain = true;
     	double bestGainRatio = 0.0;
     	//Added an additional key to map trainDataX with trainDataY
+    	//TODO: Make it into hashmap while splitting into X and Y
+    	//TODO: Information gain can be done outside this code. Its same for every feature
     	for(WeatherData wd : trainDataX)
     	{
     		i++;
