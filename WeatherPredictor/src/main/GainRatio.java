@@ -17,6 +17,8 @@ import util.WeatherData;
 
 public class GainRatio 
 {
+	private HashMap<String,HashMap<Integer,WeatherData>> ysubset;
+	private HashMap<String,HashMap<Integer,WeatherData>> xsubset;
   private Feature feature2consider;
   private double partitionPoint;
   private double gainRatio = roundoff(Double.MIN_VALUE);
@@ -28,9 +30,9 @@ public class GainRatio
   private HashMap<Integer,WeatherData>yTrainRightPart;
   private HashMap<Integer,WeatherData> YDataInTrain = new LinkedHashMap<Integer,WeatherData>();
   private ArrayList<Integer> keys = new ArrayList<Integer>();
-  public GainRatio(HashMap<Integer,WeatherData> trainDataX,HashMap<Integer,WeatherData> trainDataY,
-		                              Feature attribute,String target_val) throws IOException
-  {
+  public GainRatio(HashMap<Integer, WeatherData> trainDataX, HashMap<Integer, WeatherData> trainDataY, Feature attribute,
+			String target_val)throws IOException {
+	
 		  this.feature2consider = attribute;
 		  this.XDataInTrain = trainDataX;
 		  this.YDataInTrain = trainDataY;
@@ -128,11 +130,23 @@ public class GainRatio
   		{
   			xTrainRightPart.put(keys.get(i), XDataInTrain.get(keys.get(i)));
   			yTrainRightPart.put(keys.get(i), YDataInTrain.get(keys.get(i)));
-  		}	
+  		}
+  		
+  		ysubset = new HashMap<String,HashMap<Integer,WeatherData>>();
+		String leftName = "less" + partitionPos;
+		String rightName = "more" + partitionPos;
+		ysubset.put(leftName, this.getYTrainLeftPart());
+		ysubset.put(rightName, this.getYTrainRightPart());
+		xsubset = new HashMap<String,HashMap<Integer,WeatherData>>();
+		String xleftName = "less" + partitionPos;
+		String xrightName = "more" + partitionPos;
+		xsubset.put(leftName, this.getXTrainLeftPart());
+		xsubset.put(rightName, this.getXTrainRightPart());
           		
 		   
   }
-  public double calculateGainRatio(double information_gain_System,Feature feature2consider, String target_val, HashMap<Integer,WeatherData>XDataInTrain,
+  
+public double calculateGainRatio(double information_gain_System,Feature feature2consider, String target_val, HashMap<Integer,WeatherData>XDataInTrain,
 		  HashMap<Integer,WeatherData> YDataInTrain,int i)
 		  {
 	        double calGainRatio = 0.0;
@@ -215,6 +229,13 @@ public class GainRatio
 		     
 		      return systemInfGain;
   }
+         public HashMap<String,HashMap<Integer,WeatherData>> getYSubset() {
+     		return ysubset;
+     	}
+
+     	public HashMap<String,HashMap<Integer,WeatherData>> getXSubset() {
+     		return xsubset;
+     	}
   public Feature getFeature()
   {
   	return feature2consider;

@@ -2,7 +2,6 @@ package main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,82 +10,98 @@ import java.util.Map;
 import java.util.Scanner;
 
 import util.Feature;
+import util.Node;
 import util.WeatherData;
 
 public class DecisionTree {
-	public static void main(String args[]) throws IOException {
+	static ArrayList<String> targets = new ArrayList<String>();
+
+	public static void main(String args[]) {
+		// read data
+		// add all predictions to targets ArrayList (Rain,Snow,Fog,Thunderstorm)
+		updateTarget();
+
+		ArrayList<Feature> features = new ArrayList<Feature>();
 		HashMap<Integer,WeatherData> XtrainDataMap = new LinkedHashMap<Integer,WeatherData>();
 		HashMap<Integer,WeatherData> YtrainDataMap= new LinkedHashMap<Integer,WeatherData>();
 		HashMap<Integer,WeatherData> XtestDataMap = new LinkedHashMap<Integer,WeatherData>();
 		HashMap<Integer,WeatherData> YtestDataMap = new LinkedHashMap<Integer,WeatherData>();
-		ArrayList<Feature> features = new ArrayList<Feature>();
-		
+
 		XtrainDataMap = readData("weatherDataTrain.txt",true);
 		YtrainDataMap = readData("weatherDataTrain.txt",false);
 		XtestDataMap = readData("weatherDataTest.txt",true);
-		YtrainDataMap = readData("weatherDataTest.txt",false);
-		String target_val = "Rain";
+		YtestDataMap = readData("weatherDataTest.txt",false);
+
 		for(Map.Entry<Integer, WeatherData> key_weatherData : XtrainDataMap.entrySet())
 		{
 			WeatherData wd = key_weatherData.getValue();
 			ArrayList<Feature> allFeatures = wd.getFeatures();
 			for(Feature f : allFeatures)
 			{
-				if((f.getName().contains("EST")) || (f.getName().contains("PrecipitationIn")))
-				{
+				if((f.getName().contains("EST")) ){
 					continue;
-				}
-				else
-				{
+				}else{
 					features.add(f);
-				}
-					
+				}					
 			}
 			break;
-		} 
-		SelectFeature sFeature = new SelectFeature(target_val,features,XtrainDataMap,YtrainDataMap);
-		Feature selected_feat = sFeature.getFeature();
-		double selected_GainRatio = sFeature.getGainRatio();
-		HashMap<Integer,WeatherData>xTrainLeftParts = sFeature.getXTrainLeftPart();
-		HashMap<Integer,WeatherData>xTrainRightParts = sFeature.getXTrainRightPart();
-		HashMap<Integer,WeatherData>yTrainLeftParts = sFeature.getYTrainLeftPart();
-		HashMap<Integer,WeatherData>yTrainRightParts = sFeature.getXTrainRightPart();
-		double maxGainRatioFeatureValue = sFeature.getMaxGainRatioFeatureValue();
-		System.out.println("the feature  selected is"+selected_feat.getName());
-		/*InformationRatio ir = new InformationRatio();
-		for(WeatherData wd : XtrainData)
-		{
-			//System.out.println("the inf ratio is");
-			ArrayList<Feature> frs = wd.getFeatures();
-		    for(Feature f : frs)
-		    {
-		    	if(f.getName().equals("Mean TemperatureF"))
-		    	{
-		    		System.out.println("the feature is"+f.getName());
-		    		double gainr = ir.calcInformationRatio(XtrainData,YtrainData,f);
-		    		System.out.println("the inf ratio is"+gainr);
-		    	
-		    	}
-		    }
-		    break;
-			//ir.calcInformationRatio(trainDataX,trainDataY,)
-		}*/
-		
-		/*for(WeatherData wd : YtrainData)
-		{
-			for(Feature fd: wd.getFeatures())
-			{
-				System.out.println(fd.getName());
-				System.out.println(fd.getValues());
+		}
+		ArrayList<String> resultCompare = new ArrayList<String>();
+		//for(String target: targets){
+		    String target="Fog";
+			//Validate v = new Validate(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
+			//		YtestDataMap);
+			
+			//HashMap<Integer,String> res = v.validate();
+			ValidateWithPruning vwp = new ValidateWithPruning(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
+					YtestDataMap);
+			HashMap<Integer,String> res = vwp.validateAfterPrune();
+			ArrayList<String> forCompare = new ArrayList<String>();
+			//System.out.println("result size "+res.size());
+			for(Map.Entry<Integer, String> result : res.entrySet()) {
+				String wd = result.getValue();
+			 
+				resultCompare.add(wd);
+			// }
+				
 			}
 			
-		}*/
+			
+		//}
+		ArrayList<String> actualResult = new ArrayList<String>();
+		for(Map.Entry<Integer, WeatherData> result : YtestDataMap.entrySet()) {
+			WeatherData wd = result.getValue();
+			ArrayList x =(wd.featureValue("Events")); 
+			String p="";
+			for(int i=0;i<x.size();i++) {
+				if(!p.equals("")) {
+				p +="-"+x.get(i);
+				}
+				else {
+					p+=x.get(i);
+				}
+			}
+			actualResult.add(p);
+		}
+		int correct_prediction_fog=0;
+		int fogCount= 0;
+		for(int i=0;i<actualResult.size();i++) {
+			System.out.println("actual: "+actualResult.get(i));
+			System.out.println("predicted: "+resultCompare.get(i));
+			if(actualResult.get(i).contains("Fog")&&(resultCompare.contains("Fog"))) {
+				correct_prediction_fog ++;
+			}
+			if(actualResult.get(i).contains("Fog")) {
+				fogCount++;
+			}
+		}
+		System.out.println("Accuracy for Fog "+(double)(correct_prediction_fog/fogCount));
 	}
 
 	private static HashMap<Integer,WeatherData> readData(String filename,boolean isX) {
 		HashMap<Integer,WeatherData> data = new LinkedHashMap<Integer,WeatherData>();
 		Scanner scanner = null;
-		int key = 0;
+		int key=0;
 		try {
 			scanner = new Scanner(new File(filename));
 		} catch (FileNotFoundException exception) {
@@ -106,12 +121,18 @@ public class DecisionTree {
 			else
 			{
 				newData.addFeaturesToYData(line);
-			}			
+			}
 			data.put(key, newData);
 			key++;
-			//data.add(newData);
 		}
 		return data;
+	}	
+
+	public static void updateTarget() {
+		targets.add("Fog");
+		targets.add("Rain");
+		targets.add("Snow");
+		targets.add("Thunderstorm");
+		targets.add("Normal");
 	}
-	
 }
