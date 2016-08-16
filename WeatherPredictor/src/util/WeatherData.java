@@ -123,7 +123,7 @@ public class WeatherData {
 					Object featureObj = feature;
 					if (feature.isEmpty())
 					{
-						feature = "0";
+						feature = "NA";
 					}
 					List<Object> val = new ArrayList<Object>();
 					val.add(feature);

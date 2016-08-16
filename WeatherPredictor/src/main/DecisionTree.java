@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -15,23 +16,28 @@ import util.WeatherData;
 
 public class DecisionTree {
 	static ArrayList<String> targets = new ArrayList<String>();
+	private static ArrayList<Feature> features = new ArrayList<Feature>();
+	private static HashMap<Integer,WeatherData> XtrainDataMap = new LinkedHashMap<Integer,WeatherData>();
+	private static HashMap<Integer,WeatherData> YtrainDataMap= new LinkedHashMap<Integer,WeatherData>();
+	private static HashMap<Integer,WeatherData> XtestDataMap = new LinkedHashMap<Integer,WeatherData>();
+	private static HashMap<Integer,WeatherData> YtestDataMap = new LinkedHashMap<Integer,WeatherData>();
 
 	public static void main(String args[]) {
 		// read data
 		// add all predictions to targets ArrayList (Rain,Snow,Fog,Thunderstorm)
 		updateTarget();
 
-		ArrayList<Feature> features = new ArrayList<Feature>();
-		HashMap<Integer,WeatherData> XtrainDataMap = new LinkedHashMap<Integer,WeatherData>();
-		HashMap<Integer,WeatherData> YtrainDataMap= new LinkedHashMap<Integer,WeatherData>();
-		HashMap<Integer,WeatherData> XtestDataMap = new LinkedHashMap<Integer,WeatherData>();
-		HashMap<Integer,WeatherData> YtestDataMap = new LinkedHashMap<Integer,WeatherData>();
+		
 
 		XtrainDataMap = readData("weatherDataTrain.txt",true);
 		YtrainDataMap = readData("weatherDataTrain.txt",false);
 		XtestDataMap = readData("weatherDataTest.txt",true);
 		YtestDataMap = readData("weatherDataTest.txt",false);
-
+        //deal with NA data in train and test data sets
+		MissingValues mv = new MissingValues();
+		XtrainDataMap = mv.resolveMissingValue(XtrainDataMap, YtrainDataMap);
+		XtestDataMap = mv.resolveMissingValue(XtestDataMap, YtestDataMap);
+	
 		for(Map.Entry<Integer, WeatherData> key_weatherData : XtrainDataMap.entrySet())
 		{
 			WeatherData wd = key_weatherData.getValue();
@@ -96,6 +102,26 @@ public class DecisionTree {
 			}
 		}
 		System.out.println("Accuracy for Fog "+(double)(correct_prediction_fog/fogCount));
+	}
+	public List<String> getFeatureVal(String label,String fName)
+	{
+		List<String> notNAFValues = null;
+		for(Map.Entry<Integer, WeatherData> keyWeatherData : XtrainDataMap.entrySet())
+		{
+			WeatherData wd = keyWeatherData.getValue();
+			int keyInData = keyWeatherData.getKey();
+			ArrayList<Feature> featureList = wd.getFeatures();
+			for(Feature f : featureList)
+			{
+			     String notAnNA = (String) f.getValues().get(0);
+			     if(f.getName().equals(fName)&& (!notAnNA.equals("NA")))
+			     {
+			    	 notNAFValues.add(notAnNA);
+			    	 break;
+			     }
+			}
+		}
+		return notNAFValues;
 	}
 
 	private static HashMap<Integer,WeatherData> readData(String filename,boolean isX) {
