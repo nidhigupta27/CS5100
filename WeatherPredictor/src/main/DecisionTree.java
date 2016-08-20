@@ -3,62 +3,63 @@ package main;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
 import util.Feature;
-import util.Node;
 import util.WeatherData;
 
 public class DecisionTree {
 	static ArrayList<String> targets = new ArrayList<String>();
-	private static ArrayList<Feature> features = new ArrayList<Feature>();
-	private static HashMap<Integer,WeatherData> XtrainDataMap = new LinkedHashMap<Integer,WeatherData>();
-	private static HashMap<Integer,WeatherData> YtrainDataMap= new LinkedHashMap<Integer,WeatherData>();
-	private static HashMap<Integer,WeatherData> XtestDataMap = new LinkedHashMap<Integer,WeatherData>();
-	private static HashMap<Integer,WeatherData> YtestDataMap = new LinkedHashMap<Integer,WeatherData>();
 
-	public static void main(String args[]) {
+	public static void main(String args[]) throws Exception {
 		// read data
 		// add all predictions to targets ArrayList (Rain,Snow,Fog,Thunderstorm)
 		updateTarget();
 
-		
-
-		XtrainDataMap = readData("weatherDataTrain.txt",true);
-		YtrainDataMap = readData("weatherDataTrain.txt",false);
-		XtestDataMap = readData("weatherDataTest.txt",true);
-		YtestDataMap = readData("weatherDataTest.txt",false);
-        //deal with NA data in train and test data sets
-		MissingValues mv = new MissingValues();
-		XtrainDataMap = mv.resolveMissingValue(XtrainDataMap, YtrainDataMap);
-		XtestDataMap = mv.resolveMissingValue(XtestDataMap, YtestDataMap);
+		ArrayList<Feature> features = new ArrayList<Feature>();
+		HashMap<Integer,WeatherData> XtrainDataMap = new LinkedHashMap<Integer,WeatherData>();
+		HashMap<Integer,WeatherData> YtrainDataMap= new LinkedHashMap<Integer,WeatherData>();
+		HashMap<Integer,WeatherData> XtestDataMap = new LinkedHashMap<Integer,WeatherData>();
+		HashMap<Integer,WeatherData> YtestDataMap = new LinkedHashMap<Integer,WeatherData>();
+        //Train/test
+		XtrainDataMap = readData("weatherDataTrain",true);
+		YtrainDataMap = readData("weatherDataTrain",false);
+		XtestDataMap = readData("weatherDataTest",true);
+		YtestDataMap = readData("weatherDataTest",false);
 	
-		for(Map.Entry<Integer, WeatherData> key_weatherData : XtrainDataMap.entrySet())
+		for(Map.Entry<Integer, WeatherData> weatherData : XtrainDataMap.entrySet())
 		{
-			WeatherData wd = key_weatherData.getValue();
+			WeatherData wd = weatherData.getValue();
 			ArrayList<Feature> allFeatures = wd.getFeatures();
 			for(Feature f : allFeatures)
-			{
-				if((f.getName().contains("EST")) ){
-					continue;
-				}else{
+			{		
+				
+				if(!f.getName().equals("EST")
+						//||!(f.getName().contains("WindDirDegrees"))
+						/*||!(f.getName().contains("Mean Humidity"))
+						||!(f.getName().contains("Mean Sea Level PressureIn"))
+						||!(f.getName().contains("Mean VisibilityMiles"))
+						||!(f.getName().contains("Mean Wind SpeedMPH"))
+						||!(f.getName().contains("Max Gust SpeedMPH"))
+						||!(f.getName().contains("PrecipitationIn"))
+						||!(f.getName().contains("CloudCover"))
+						||!(f.getName().contains("WindDirDegrees"))*/)
+						{
+					//System.out.println(f.getName());
 					features.add(f);
-				}					
+				}
 			}
 			break;
 		}
 		ArrayList<String> resultCompare = new ArrayList<String>();
-		//for(String target: targets){
-		    String target="Fog";
-			//Validate v = new Validate(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
-			//		YtestDataMap);
-			
-			//HashMap<Integer,String> res = v.validate();
+		HashMap<Integer,String> comp = new HashMap<Integer,String>();
+		for(String target: targets){
+			int i=0;
 			ValidateWithPruning vwp = new ValidateWithPruning(features, target, XtrainDataMap, YtrainDataMap, XtestDataMap,
 					YtestDataMap);
 			HashMap<Integer,String> res = vwp.validateAfterPrune();
@@ -66,14 +67,27 @@ public class DecisionTree {
 			//System.out.println("result size "+res.size());
 			for(Map.Entry<Integer, String> result : res.entrySet()) {
 				String wd = result.getValue();
-			 
-				resultCompare.add(wd);
-			// }
+				if(comp.containsKey(i))
+				{
+					if(!wd.equals(""))
+					 {
+					   String s = comp.get(i);
+					s +="-"+wd;
+					comp.put(i,s);
+					 }
+				}
+				else {
+					if(!wd.equals(""))
+				comp.put(i, wd);
+				}
+				i++;
+			 }
 				
 			}
 			
 			
 		//}
+		
 		ArrayList<String> actualResult = new ArrayList<String>();
 		for(Map.Entry<Integer, WeatherData> result : YtestDataMap.entrySet()) {
 			WeatherData wd = result.getValue();
@@ -89,39 +103,68 @@ public class DecisionTree {
 			}
 			actualResult.add(p);
 		}
-		int correct_prediction_fog=0;
+		int correct_prediction=0;
 		int fogCount= 0;
-		for(int i=0;i<actualResult.size();i++) {
+		/*for(int i=0;i<actualResult.size();i++) {
 			System.out.println("actual: "+actualResult.get(i));
-			System.out.println("predicted: "+resultCompare.get(i));
-			if(actualResult.get(i).contains("Fog")&&(resultCompare.contains("Fog"))) {
+			System.out.println("predicted: "+comp.get(i));
+			/*if(actualResult.get(i).contains("Thunderstorm")&&(resultCompare.contains("Thunderstorm"))) {
 				correct_prediction_fog ++;
 			}
-			if(actualResult.get(i).contains("Fog")) {
+			if(actualResult.get(i).contains("Thunderstorm")) {
 				fogCount++;
 			}
-		}
-		System.out.println("Accuracy for Fog "+(double)(correct_prediction_fog/fogCount));
-	}
-	public List<String> getFeatureVal(String label,String fName)
-	{
-		List<String> notNAFValues = null;
-		for(Map.Entry<Integer, WeatherData> keyWeatherData : XtrainDataMap.entrySet())
-		{
-			WeatherData wd = keyWeatherData.getValue();
-			int keyInData = keyWeatherData.getKey();
-			ArrayList<Feature> featureList = wd.getFeatures();
-			for(Feature f : featureList)
-			{
-			     String notAnNA = (String) f.getValues().get(0);
-			     if(f.getName().equals(fName)&& (!notAnNA.equals("NA")))
-			     {
-			    	 notNAFValues.add(notAnNA);
-			    	 break;
-			     }
+			if(actualResult.get(i).equals(comp.get(i))) {
+				correct_prediction ++;
 			}
+			else if(actualResult.get(i).contains("Normal")&&comp.get(i)==null) {
+				correct_prediction ++;
+			}
+		}*/
+		ArrayList<String> all_targets = new ArrayList<String>();
+		all_targets.add("Rain");
+		all_targets.add("Snow");
+		all_targets.add("Thunderstorm");
+		all_targets.add("Fog");
+		int count_in_not_null = 0;
+		int count_in_null = 0;
+		for(int i=0;i<actualResult.size();i++)
+		{
+			System.out.println("the actual result"+actualResult.get(i));
+			System.out.println("the model result"+comp.get(i));
+			for(String target: all_targets)
+			{
+				if((comp.get(i)!=null) && (!actualResult.get(i).contains("Normal")))
+				{
+					count_in_not_null++;
+					System.out.println("the value of actualResults"+ actualResult.get(i));
+					System.out.println("the value of modelResults"+ comp.get(i));
+					String[] actualResults = actualResult.get(i).split("-");
+					String[] modelResults =  comp.get(i).split("-");
+					if(Arrays.asList(actualResults).contains(target) && Arrays.asList(modelResults).contains(target))
+					{
+						//System.out.println("Both the model and actual have target");
+						correct_prediction ++;
+					}
+					else if(!Arrays.asList(actualResults).contains(target) && !Arrays.asList(modelResults).contains(target))
+					{
+						//System.out.println("Both the model and actual not have target");
+						correct_prediction ++;
+					}
+				
+				}
+			}
+				if(actualResult.get(i).contains("Normal")&&comp.get(i)==null) 
+				{
+					count_in_null++;
+					//System.out.println("Bz of normal and null");
+					correct_prediction ++;
+				}
+					
 		}
-		return notNAFValues;
+								
+		System.out.println("Accuarcy "+(double)correct_prediction/(count_in_not_null+count_in_null));
+		//System.out.println("Accuracy for Thunderstorm "+(double)(correct_prediction_fog/fogCount));
 	}
 
 	private static HashMap<Integer,WeatherData> readData(String filename,boolean isX) {
@@ -159,6 +202,6 @@ public class DecisionTree {
 		targets.add("Rain");
 		targets.add("Snow");
 		targets.add("Thunderstorm");
-		targets.add("Normal");
+		//targets.add("Normal");
 	}
 }

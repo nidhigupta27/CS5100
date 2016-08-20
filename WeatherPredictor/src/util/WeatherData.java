@@ -104,9 +104,12 @@ public class WeatherData {
 				continue;
 			}
 			else if(featureNames.get(i).contains("EST")) {
-				List<Date> date = new ArrayList<Date>();
-				date.add(dateConversion(feature));
-				features.add(new Feature<Date> (date,featureNames.get(i) ));
+				String []daysplit = feature.split("-");
+				List<Object> date = new ArrayList<Object>();
+				Object featureObj = daysplit[1];
+				date.add(featureObj);
+				//date.add(dateConversion(feature));
+				features.add(new Feature<Object> (date,featureNames.get(i) ));
 			}
 			else 
 			{
@@ -119,11 +122,13 @@ public class WeatherData {
 					precp.add(feature);
 					features.add(new Feature<Object> (precp,featureNames.get(i) ));
 				}
+				
 				else {
 					Object featureObj = feature;
 					if (feature.isEmpty())
 					{
-						feature = "NA";
+						//System.out.println("feture empty "+featureNames.get(i));
+						feature = "0";
 					}
 					List<Object> val = new ArrayList<Object>();
 					val.add(feature);
