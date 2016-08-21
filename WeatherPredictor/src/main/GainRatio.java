@@ -40,26 +40,12 @@ public class GainRatio {
 		HashMap<Integer, Double> XDataTrainAttrbMap = new LinkedHashMap<Integer, Double>();
 		XDataTrainAttrbMap = getHashByAttrib(XDataInTrain, attribute);
 		XDataTrainAttrbMap = sortByValue(XDataTrainAttrbMap);
-		this.XDataInTrain = getSortedTrain(XDataTrainAttrbMap,
-				this.XDataInTrain);
-		this.YDataInTrain = getSortedTrain(XDataTrainAttrbMap,
-				this.YDataInTrain);
-		// Testing purpose
-		/*
-		 * for(Map.Entry<Integer, WeatherData> key_weatherData :
-		 * XDataInTrain.entrySet()) { WeatherData wd =
-		 * key_weatherData.getValue(); ArrayList<Feature> fet =
-		 * wd.getFeatures(); for(Feature f : fet) {
-		 * if(f.getName().equals(feature2consider.getName())) { Double fval =
-		 * Double.parseDouble((String)f.getValues().get(0));
-		 * System.out.println("the sorted order is"+f.getName()+" "+fval); } } }
-		 */
-
+		this.XDataInTrain = getSortedTrain(XDataTrainAttrbMap,this.XDataInTrain);
+		this.YDataInTrain = getSortedTrain(XDataTrainAttrbMap,this.YDataInTrain);		
 		int partitionPos = 0;
-		double information_gain_System = roundoff(getInformationGainSystem(
-				trainDataY, target_val));
-		// System.out.println("the inf gain of system"+information_gain_System);
-		// Make an arraylist of keys
+		double information_gain_System = roundoff(getInformationGainSystem(trainDataY, target_val));
+		
+		// Make an array list of keys
 		for (Map.Entry<Integer, Double> key_weatherData : XDataTrainAttrbMap
 				.entrySet()) {
 			keys.add(key_weatherData.getKey());
@@ -72,20 +58,19 @@ public class GainRatio {
 			ArrayList<Feature> featureData2 = wd2.getFeatures();
 			Double feature_Val1 = 0.0;
 			Double feature_Val2 = 0.0;
-			for (Feature f : featureData1) {
-				if (f.getName().equals(feature2consider.getName())) {
-					feature_Val1 = Double.parseDouble((String) f.getValues()
-							.get(0));
+			for (Feature f : featureData1) 
+			{
+				if (f.getName().equals(feature2consider.getName())) 
+				{
+					feature_Val1 = Double.parseDouble((String) f.getValues().get(0));
 				}
 			}
 			for (Feature f : featureData2) {
 				if (f.getName().equals(feature2consider.getName())) {
-					feature_Val2 = Double.parseDouble((String) f.getValues()
-							.get(0));
+					feature_Val2 = Double.parseDouble((String) f.getValues().get(0));
 				}
 			}
 			if (feature_Val1 != feature_Val2) {
-				// System.out.println("I am here");
 				double currGainRatio = roundoff(calculateGainRatio(
 						information_gain_System, feature2consider, target_val,
 						XDataInTrain, YDataInTrain, i));
@@ -162,8 +147,6 @@ public class GainRatio {
 			double splitInfoFromPartition = getInformationGain(
 					((double) lPart / XDataInTrain.size()),
 					((double) rPart / XDataInTrain.size()));
-
-			// System.out.println("The split info from partition"+splitInfoFromPartition);
 
 			// Gain ratio of Partition
 			calGainRatio = roundoff(gainFromPart / splitInfoFromPartition);

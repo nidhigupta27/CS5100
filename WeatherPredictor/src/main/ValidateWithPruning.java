@@ -1,5 +1,6 @@
 package main;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,61 +14,50 @@ public class ValidateWithPruning {
 
 	ArrayList<Feature> features;
 	String target;
-	HashMap<Integer, WeatherData> XtrainDataMap;
-	HashMap<Integer, WeatherData> YtrainDataMap;
 	HashMap<Integer, WeatherData> XtestDataMap;
 	HashMap<Integer, WeatherData> YtestDataMap;
+	HashMap<Integer, WeatherData> XtrainDataMap;
+	HashMap<Integer, WeatherData> YtrainDataMap;
 
 	private Node root;
 	private double score;
 	private HashMap<Integer, String> result = new HashMap<Integer, String>();
 
-	public ValidateWithPruning(ArrayList<Feature> features, String target,
-			HashMap<Integer, WeatherData> xtrainDataMap2,
-			HashMap<Integer, WeatherData> ytrainDataMap2,
-			HashMap<Integer, WeatherData> xtestDataMap2,
-			HashMap<Integer, WeatherData> ytestDataMap2) {
+	public ValidateWithPruning(Node root,ArrayList<Feature> features, String target,HashMap<Integer, WeatherData> xtrainDataMap,HashMap<Integer, WeatherData> ytrainDataMap,HashMap<Integer, WeatherData> xtestDataMap2,HashMap<Integer, WeatherData> ytestDataMap2) 
+	{
 		this.target = target;
 		this.features = features;
-		this.XtrainDataMap = xtrainDataMap2;
-		this.YtrainDataMap = ytrainDataMap2;
 		this.XtestDataMap = xtestDataMap2;
 		this.YtestDataMap = ytestDataMap2;
-
+		this.XtrainDataMap = xtrainDataMap;
+		this.YtrainDataMap = ytrainDataMap;
+		this.root = root;
 	}
 
-	public HashMap<Integer, String> validateAfterPrune() {
-		// Validate v = new Validate(features, target, XtrainDataMap,
-		// YtrainDataMap, XtestDataMap,
-		// YtestDataMap);
+	public HashMap<Integer, String> validateAfterPrune() throws IOException 
+	{	
+		mine();
 		result = validate();
-		PostTreePruning ptp = new PostTreePruning(root, XtestDataMap,
-				YtestDataMap, XtestDataMap, result, target);
+		//GrowTree tree = new GrowTree(features, target, XtrainDataMap,
+			//	YtrainDataMap, XtestDataMap, YtestDataMap);
+		//System.out.println("calling tree construct");
+		//Node root = tree.construct();
+		//System.out.println("tree created successfully");
+		PostTreePruning ptp = new PostTreePruning(XtestDataMap,YtestDataMap, XtestDataMap, result, target);
 		Node newRoot = ptp.execute(root, XtestDataMap);
-		root = newRoot;
+	    root = newRoot;
+		//mine();
 		result = validate();
 		return result;
 	}
 
 	public HashMap<Integer, String> validate() {
-		try {
-			//System.out.println("before grow tree");
 
-			GrowTree tree = new GrowTree(this.features, this.target,
-					this.XtrainDataMap, this.YtrainDataMap, this.XtestDataMap,
-					this.YtestDataMap);
-			System.out.println("calling tree construct");
-			root = tree.construct();
-			System.out.println("tree created successfully");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		// result = this.YtestDataMap;
 		int correct = 0;
+		//mine()
 		HashMap<Integer, String> res = getResult();
-
 		return res;
-		// return scores;
+		
 	}
 
 	public HashMap<Integer, String> getResult() {
@@ -81,14 +71,15 @@ public class ValidateWithPruning {
 			WeatherData currInstance = XtestDataMap.get(i);
 			// WeatherData resInstance = result.get(i);
 			String value = null;
-			// System.out.println("node leaf label "+node.getleafLabel());
+			 //System.out.println("node leaf label "+node.getleafLabel());
 			while (!node.getType().equals("leaf")) {
-				// System.out.println("node type "+node.getType());
+				 // System.out.println("node type and node name"+node.getType()+" "+node.getAttribute().getName());
 				String attributeName = node.getAttribute().getName();
-				ArrayList<Feature> attributeValuePairs = currInstance
-						.getFeatures();
-				for (Feature f : attributeValuePairs) {
-					if (f.getName().contains(attributeName)) {
+				ArrayList<Feature> attributeValuePairs = currInstance.getFeatures();
+				for (Feature f : attributeValuePairs) 
+				{
+					if (f.getName().contains(attributeName)) 
+					{
 						value = (String) f.getValues().get(0);
 					}
 				}
@@ -96,28 +87,37 @@ public class ValidateWithPruning {
 
 				HashMap<String, Node> children = node.getChildren();
 				String tmp = "";
-				for (String s : children.keySet()) {
+				for (String s : children.keySet()) 
+				{
 					String threshold = s.substring(4);
-					if (Double.parseDouble(value) < Double
-							.parseDouble(threshold)) {
+					if (Double.parseDouble(value) <= Double
+							.parseDouble(threshold)) 
+					{
 						tmp = "less";
-					} else {
+					} 
+					else 
+					{
 						tmp = "more";
 					}
 					String curLabel = s.substring(0, 4);
 
-					if (tmp.equals(curLabel)) {
+					if (tmp.equals(curLabel)) 
+					{
 						node = children.get(s);
-						// System.out.println("node "+node.getleafLabel());
-
 					}
 				}
 
 			}
-			// System.out.println("node.getLeafLabel "+node.getType());
+			/*if(!node.getleafLabel().isEmpty())
+			{
+				//System.out.println("node.getLeafLabel type "+node.getType());
+				 //System.out.println("node.getLeafLabel "+node.getleafLabel());
+			}*/
+			 
 			ArrayList<String> temp = new ArrayList<String>();
 			String[] s = node.getleafLabel().split("-");
 			for (int j = 0; j < s.length; j++) {
+				//System.out.println("Inside spilt"+s[j]);
 				temp.add(s[j]);
 			}
 			result.put(i, node.getleafLabel());

@@ -23,14 +23,15 @@ public class GrowTree {
 			HashMap<Integer, WeatherData> xtrainDataMap,
 			HashMap<Integer, WeatherData> ytrainDataMap,
 			HashMap<Integer, WeatherData> xtestDataMap,
-			HashMap<Integer, WeatherData> ytestDataMap) {
-		this.features = features;
-		this.target = target;
-		this.XtrainDataMap = xtrainDataMap;
-		this.YtrainDataMap = ytrainDataMap;
-		this.XtestDataMap = xtestDataMap;
-		this.YtestDataMap = ytestDataMap;
-	}
+			HashMap<Integer, WeatherData> ytestDataMap) 
+	     {
+		    this.features = features;
+			this.target = target;
+			this.XtrainDataMap = xtrainDataMap;
+			this.YtrainDataMap = ytrainDataMap;
+			this.XtestDataMap = xtestDataMap;
+			this.YtestDataMap = ytestDataMap;
+	    }
 
 	/**
 	 * Construct tree
@@ -82,7 +83,7 @@ public class GrowTree {
 			}
 			// System.out.println("leaf label is "+leafLabel);
 			Node leaf = new Node(leafLabel);
-
+			//System.out.println("leaf label is "+leafLabel);
 			return leaf;
 		}
 		// Choose the root attribute
@@ -103,7 +104,7 @@ public class GrowTree {
 		}
 		// Make a new root
 		Node root = new Node(rootAttr);
-
+        //System.out.println("Root of  the tree"+ root.getAttribute().getName());
 		// Get value subsets of the root attribute to construct branches
 		HashMap<String, HashMap<Integer, WeatherData>> xSubsets = selectedFeature
 				.getXSubset();
@@ -116,7 +117,8 @@ public class GrowTree {
 			HashMap<Integer, WeatherData> xsubset = xSubsets.get(valueName);
 
 			if (ysubset.size() == 0 || ysubset == null) {
-				String leafLabel = getMajorityLabel(target, ysubset);
+				//String leafLabel = getMajorityLabel(target, ysubset);
+				String leafLabel = "";
 				// System.out.println("leaf label is "+leafLabel);
 				Node leaf = new Node(leafLabel);
 				root.addChild(valueName, leaf);
@@ -134,7 +136,7 @@ public class GrowTree {
 					 */
 				}
 				Node child = constructTree(features, xsubset, ysubset);
-				// .out.println("done with child");
+				
 				root.addChild(valueName, child);
 
 				// }
@@ -147,10 +149,12 @@ public class GrowTree {
 	}
 
 	public Boolean homogenous(String target,
-			HashMap<Integer, WeatherData> ytrainDataMap2) {
+			HashMap<Integer, WeatherData> ytrainDataMap2) 
+	{
 		ArrayList<ArrayList<String>> valuesOfTarget = new ArrayList<ArrayList<String>>();
 		for (Map.Entry<Integer, WeatherData> key_weatherData : ytrainDataMap2
-				.entrySet()) {
+				.entrySet()) 
+		{
 			WeatherData wd = key_weatherData.getValue();
 			valuesOfTarget.add(wd.featureValue("Events"));
 		}
