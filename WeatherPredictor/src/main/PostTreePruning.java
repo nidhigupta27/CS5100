@@ -60,7 +60,7 @@ public class PostTreePruning {
 	 //Get the threshold value and feature name of node		
 			double threshold = Double.parseDouble(c.substring(4)); 
 			
-			String featureName = node.getAttribute().getName();
+			String featureName = node.getFeature();;
     //Loop through all rows in test data set and create a new dataset dataAtNode that consist of all test 
 	//instances that satisfy a threshold value test of the node
 			for (Map.Entry<Integer, WeatherData> key_weatherData : XDataValidTest.entrySet()) 

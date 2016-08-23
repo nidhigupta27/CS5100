@@ -2,180 +2,155 @@ package main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 import util.Feature;
 import util.Node;
 import util.WeatherData;
 
 public class DecisionTree {
+
 	static ArrayList<String> targets = new ArrayList<String>();
+	static private ArrayList<String> featureSet = null;
+	static HashMap<Integer,String> comp = new HashMap<Integer,String>();
 
 	public static void main(String args[]) throws Exception {
-		// read data
 		// add all predictions to targets ArrayList (Rain,Snow,Fog,Thunderstorm)
 		updateTarget();
 
 		ArrayList<Feature> features = new ArrayList<Feature>();
+		HashMap<String,Node> rootForClasses = new HashMap<String,Node>();
 		HashMap<Integer,WeatherData> XtrainDataMap = new LinkedHashMap<Integer,WeatherData>();
 		HashMap<Integer,WeatherData> YtrainDataMap= new LinkedHashMap<Integer,WeatherData>();
 		HashMap<Integer,WeatherData> XtestDataMap = new LinkedHashMap<Integer,WeatherData>();
 		HashMap<Integer,WeatherData> YtestDataMap = new LinkedHashMap<Integer,WeatherData>();
-        //Train/test
-		XtrainDataMap = readData("weatherDataTrain2",true);
-		YtrainDataMap = readData("weatherDataTrain2",false);
-		XtestDataMap = readData("weatherDataTest",true);
-		YtestDataMap = readData("weatherDataTest",false);
-	    MissingValues mv = new MissingValues();
-	    XtrainDataMap = mv.resolveMissingValue(XtrainDataMap,YtrainDataMap);
-	    XtestDataMap = mv.resolveMissingValue(XtestDataMap,YtestDataMap);
-	    
-		for(Map.Entry<Integer, WeatherData> weatherData : XtrainDataMap.entrySet())
-		{
-			WeatherData wd = weatherData.getValue();
-			ArrayList<Feature> allFeatures = wd.getFeatures();
-			for(Feature f : allFeatures)
-			{						
-				if(!f.getName().equals("EST"))
-				{
-					//System.out.println(f.getName());
-					features.add(f);
-				}
-			}
-			break;
-		}
-		ArrayList<String> resultCompare = new ArrayList<String>();
-		HashMap<Integer,String> comp = new HashMap<Integer,String>();
+		HashMap<Integer,WeatherData> XrandomDataMap = new LinkedHashMap<Integer,WeatherData>();
+		// read train and test data
+		XtrainDataMap = readData("weatherDataTrain.txt",true);
+		YtrainDataMap = readData("weatherDataTrain.txt",false);
+		XtestDataMap = readData("weatherDataTest.txt",true);
+		YtestDataMap = readData("weatherDataTest.txt",false);
+		//read random data
+		XrandomDataMap = readData("randomData.csv",true);
+		// create a decision tree model of each class and classify test data
+		System.out.println("x train map size "+XtrainDataMap.size());
+		System.out.println("y test map size "+YtestDataMap.size());
+		double startTime = System.currentTimeMillis();
 		for (String target : targets) {
 			try {
 				int i = 0;
-				GrowTree tree = new GrowTree(features, target, XtrainDataMap,
-						YtrainDataMap, XtestDataMap, YtestDataMap);
-				System.out.println("calling tree construct");
+				// construct tree for current target class
+				GrowTree tree = new GrowTree(featureSet, target, XtrainDataMap,
+						YtrainDataMap);
+				System.out.println("calling tree construct for "+target);
 				Node root = tree.construct();
-				System.out.println("tree created successfully");
-
+				System.out.println("tree created successfully for "+target);
 				ValidateWithPruning vwp = new ValidateWithPruning(root,
-						features, target, XtrainDataMap,YtrainDataMap,XtestDataMap, YtestDataMap);
+						featureSet, target, XtrainDataMap,YtrainDataMap,XtestDataMap, YtestDataMap);
 				HashMap<Integer, String> res = vwp.validateAfterPrune();
-				ArrayList<String> forCompare = new ArrayList<String>();
-				// System.out.println("result size "+res.size());
-				for (Map.Entry<Integer, String> result : res.entrySet()) {
-					String wd = result.getValue();
-					if (comp.containsKey(i)) {
-						if (!wd.equals("")) {
-							String s = comp.get(i);
-							s += "-" + wd;
-							comp.put(i, s);
-						}
-					} else {
-						if (!wd.equals(""))
-							comp.put(i, wd);
-					}
-					i++;
-				}
-			} catch (Exception e) {
+				Node prunedRoot = vwp.getRoot();
+				rootForClasses.put(target, prunedRoot);
+				formatResult(res,i);
+
+			}
+			catch (Exception e) {
 				System.out.println(e.getMessage());
 			}
 		}
-			
-			
-		//}
-		
-		ArrayList<String> actualResult = new ArrayList<String>();
-		for(Map.Entry<Integer, WeatherData> result : YtestDataMap.entrySet()) {
-			WeatherData wd = result.getValue();
-			ArrayList x =(wd.featureValue("Events")); 
-			String p="";
-			for(int i=0;i<x.size();i++) {
-				if(!p.equals("")) {
-				p +="-"+x.get(i);
-				}
-				else {
-					p+=x.get(i);
-				}
-			}
-			actualResult.add(p);
-		}
-		int correct_prediction=0;
-		int fogCount= 0;
-		
-		ArrayList<String> all_targets = new ArrayList<String>();
-		all_targets.add("Rain");
-		all_targets.add("Snow");
-		all_targets.add("Thunderstorm");
-		all_targets.add("Fog");
-		int count_in_not_null = 0;
-		int count_in_null = 0;
-		for(int i=0;i<actualResult.size();i++)
-		{
-			System.out.println(actualResult.get(i)+"\t"+ comp.get(i));
-			//System.out.println("modelResults"+ comp.get(i));
-			for(String target: all_targets)
+		double endTime = System.currentTimeMillis();
+
+		// Evaluation of the result
+		Evaluation eval = new Evaluation(YtestDataMap,targets,comp);
+		double accuracy = eval.computeAccuracy();
+
+		// J48 CLASSIFIER
+		J48Decision  J48= new J48Decision(targets,YtestDataMap);
+		double J48_accuracy = J48.evaluate();
+		System.out.println("Accuracy of Weka J48 Implementation = "+J48_accuracy);
+		System.out.println("Accuracy of C4.5 Implementation = "+accuracy);
+		System.out.println("Time for training and testing C4.5 Implementation= "+(endTime-startTime)/(1000*60)+" minutes");
+
+		//classify random data
+		comp = new HashMap<Integer,String>();
+		for(String target: targets){
+			int i=0;
+			Node curRoot =null;
+			for(Map.Entry<String, Node> rootData : rootForClasses.entrySet())
 			{
-				if((comp.get(i)!=null) && (!actualResult.get(i).contains("Normal")))
-				{
-					count_in_not_null++;
-					//System.out.println("the value of actualResults"+ actualResult.get(i));
-					//System.out.println("the value of modelResults"+ comp.get(i));
-					String[] actualResults = actualResult.get(i).split("-");
-					String[] modelResults =  comp.get(i).split("-");
-					if(Arrays.asList(actualResults).contains(target) && Arrays.asList(modelResults).contains(target))
-					{
-						//System.out.println("Both the model and actual have target");
-						correct_prediction ++;
-					}
-					else if(!Arrays.asList(actualResults).contains(target) && !Arrays.asList(modelResults).contains(target))
-					{
-						//System.out.println("Both the model and actual not have target");
-						correct_prediction ++;
-					}
-				
+				String curTarget = rootData.getKey();
+				if(curTarget.contains(target)){
+					curRoot = rootData.getValue();
+					break;
 				}
-				if((comp.get(i)==null) || (actualResult.get(i).contains("Normal")))
-				{
-					count_in_null++;
-					if(actualResult.get(i).contains("Normal")&&comp.get(i)==null) 
-					{
-							
-						//System.out.println("Bz of normal and null");
-						correct_prediction ++;
-					}
-					if(comp.get(i)==null && !(actualResult.get(i).contains("Normal")))
-					{
-						String[] actualResults = actualResult.get(i).split("-");
-						if(!Arrays.asList(actualResults).contains(target))
-								{
-							     correct_prediction ++;
-								}
-						
-					}
-					if(comp.get(i)!=null && (actualResult.get(i).contains("Normal")))
-					{
-						String[] modelResults = comp.get(i).split("-");
-						if(!Arrays.asList(modelResults).contains(target))
-						  {
-							     correct_prediction ++;
-					      }
-						
-					}
-					
-				}
-				
 			}
-					
-		}
-								
-		System.out.println("Accuarcy "+(double)correct_prediction/(count_in_not_null+count_in_null));
-		//System.out.println("Accuracy for Thunderstorm "+(double)(correct_prediction_fog/fogCount));
+			ValidateWithPruning vwp = new ValidateWithPruning(curRoot,
+					featureSet, target, null,null,XrandomDataMap, null);
+			HashMap<Integer, String> res = vwp.getResult();	
+			formatResult(res,i);
+		}		
+		writeResultToFile(XrandomDataMap);
+		System.out.println("Random data is classified successfully and written to file");
 	}
 
+	public static void writeResultToFile(HashMap<Integer,WeatherData> XrandomDataMap){
+		try{
+			PrintWriter out = new PrintWriter("output.txt");
+			out.println("Sl.no \t| Events ");
+			TreeMap<Integer,String> sorted_map = new TreeMap<Integer,String>(comp);
+			int i=0;
+			for(Map.Entry<Integer, String> result : sorted_map.entrySet()){
+				if(result.getKey()!=i) {
+					for(int j=i;j<result.getKey();j++){
+						out.println(j+"\t\t|None");
+					}
+				}
+				out.println(result.getKey()+"\t\t|"+result.getValue());
+				i=result.getKey()+1;
+			}
+			if(i!=(XrandomDataMap.size())) {
+				for(int j=i;j<(XrandomDataMap.size());j++) {
+					out.println(j+"\t\t|None");
+				}
+			}
+			out.flush();
+			out.close();			
+		}
+		catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+	}
+
+	// combines the classification result for each class, from their respective model into
+	// a format consistent with the input file. For example, the format is Fog-Rain for a data which
+	// was classified to classes Fog and Rain respectively.
+	private static HashMap<Integer,String> formatResult(HashMap<Integer,String> res,int i) {
+		for(Map.Entry<Integer, String> result : res.entrySet()) {
+			String wd = result.getValue();
+			if(comp.containsKey(i)){
+				if(!wd.equals("")) {
+					String s = comp.get(i);
+					s +="-"+wd;
+					comp.put(i,s);
+				}
+			}
+			else {
+				if(!wd.equals(""))
+					comp.put(i, wd);
+			}
+			i++;
+		}
+		return comp;
+	}
+
+	// reads the input file
+	// if boolean isX is true, then updates X values (feature values)
+	//                is false, then updates Y value (class)
 	private static HashMap<Integer,WeatherData> readData(String filename,boolean isX) {
 		HashMap<Integer,WeatherData> data = new LinkedHashMap<Integer,WeatherData>();
 		Scanner scanner = null;
@@ -183,11 +158,14 @@ public class DecisionTree {
 		try {
 			scanner = new Scanner(new File(filename));
 		} catch (FileNotFoundException exception) {
-			System.out.println("Error: File not found");
+			System.out.println("Error: File not found"+filename);
 			System.exit(1);
 		}
 		String line;
 		String firstLine = scanner.nextLine(); 
+		if(featureSet == null) {
+			addFeatureNames(firstLine);
+		}
 		while (scanner.hasNextLine()) {
 			line = scanner.nextLine();
 			WeatherData newData = new WeatherData();
@@ -206,11 +184,20 @@ public class DecisionTree {
 		return data;
 	}	
 
+	// adds all the feature name to featureSet
+	public static void addFeatureNames(String names) {
+		featureSet = new ArrayList<String>();
+		String[] tempNames= names.split(",");
+		for(String name: tempNames) {
+			if(!name.contains("EST")&&!name.contains("Events"))
+				featureSet.add(name);
+		}
+	}
+
 	public static void updateTarget() {
 		targets.add("Fog");
 		targets.add("Rain");
 		targets.add("Snow");
 		targets.add("Thunderstorm");
-		//targets.add("Normal");
 	}
 }

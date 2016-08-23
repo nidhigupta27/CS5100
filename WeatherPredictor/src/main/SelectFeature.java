@@ -10,7 +10,7 @@ import util.WeatherData;
 
 public class SelectFeature 
 {
-	private Feature feature;
+	private String feature;
 	private HashMap<Integer, WeatherData> xTrainLeftPart;
 	private HashMap<Integer, WeatherData> xTrainRightPart;
 	private HashMap<Integer, WeatherData> yTrainLeftPart;
@@ -20,7 +20,7 @@ public class SelectFeature
 	HashMap<String, HashMap<Integer, WeatherData>> ysubset;
 	HashMap<String, HashMap<Integer, WeatherData>> xsubset;
 //Constructor of SelectFeature to initialize the fields of SelectFeature class
-	public SelectFeature(String target_val, ArrayList<Feature> features,
+	public SelectFeature(String target_val, ArrayList<String> features,
 			HashMap<Integer, WeatherData> XDataInTrain,
 			HashMap<Integer, WeatherData> YDataInTrain) throws IOException {
 		    feature = null;
@@ -29,11 +29,11 @@ public class SelectFeature
 		    xTrainRightPart = null;
 		    yTrainLeftPart = null;
 		    yTrainRightPart = null;
-		HashMap<Feature, Double> gainRatioMap = new HashMap<Feature, Double>();
+		HashMap<String, Double> gainRatioMap = new HashMap<String, Double>();
 
 		// Loop through the feature list to find the feature with maximum Gain
 		// Ratio
-		for (Feature ftr : features) {
+		for (String ftr : features) {
 			double currentGainRatio = Double.MIN_VALUE;
 			HashMap<Integer, WeatherData> xTrainLeftPartCurrent = null;
 			HashMap<Integer, WeatherData> xTrainRightPartCurrent = null;
@@ -66,8 +66,8 @@ public class SelectFeature
 		}
 		//Calculate the number of features with Gain as zero
 		int count = 0;
-		for (Map.Entry<Feature, Double> data : gainRatioMap.entrySet()) {
-			Feature key = data.getKey();
+		for (Map.Entry<String, Double> data : gainRatioMap.entrySet()) {
+			String key = data.getKey();
 			double gain = data.getValue();
 			if (gain == 0.0)
 				count++;
@@ -75,8 +75,8 @@ public class SelectFeature
 		}
 
 		if (count == gainRatioMap.size()) {
-			Feature key = null;
-			for (Map.Entry<Feature, Double> data : gainRatioMap.entrySet()) {
+			String key = null;
+			for (Map.Entry<String, Double> data : gainRatioMap.entrySet()) {
 				key = data.getKey();
 				break;
 			}
@@ -95,7 +95,7 @@ public class SelectFeature
 
 	}
    //Get method to return feature
-	public Feature getFeature() {
+	public String getFeature() {
 		return feature;
 	}
 	//Get method to return the  threshold value of feature

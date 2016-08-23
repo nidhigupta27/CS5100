@@ -18,7 +18,7 @@ import util.WeatherData;
 public class GainRatio {
 	private HashMap<String, HashMap<Integer, WeatherData>> ysubset;
 	private HashMap<String, HashMap<Integer, WeatherData>> xsubset;
-	private Feature feature2consider;
+	private String feature2consider;
 	private double partitionPoint;
 	private double gainRatio;
 	private double maxGainRatioFeatureValue;
@@ -35,7 +35,7 @@ public class GainRatio {
 
 	// Gain Ratio Constructor which initializes the class fields
 	public GainRatio(HashMap<Integer, WeatherData> trainDataX,
-			HashMap<Integer, WeatherData> trainDataY, Feature attribute,
+			HashMap<Integer, WeatherData> trainDataY, String attribute,
 			String target_val) throws IOException {
 
 		this.feature2consider = attribute;
@@ -81,13 +81,13 @@ public class GainRatio {
 			Double feature_Val1 = 0.0;
 			Double feature_Val2 = 0.0;
 			for (Feature f : featureData1) {
-				if (f.getName().equals(feature2consider.getName())) {
+				if (f.getName().equals(feature2consider)) {
 					feature_Val1 = Double.parseDouble((String) f.getValues()
 							.get(0));
 				}
 			}
 			for (Feature f : featureData2) {
-				if (f.getName().equals(feature2consider.getName())) {
+				if (f.getName().equals(feature2consider)) {
 					feature_Val2 = Double.parseDouble((String) f.getValues()
 							.get(0));
 				}
@@ -114,7 +114,7 @@ public class GainRatio {
 		WeatherData wd = XDataInTrain.get(keyAtPartitionPos);
 		ArrayList<Feature> fts = wd.getFeatures();
 		for (Feature f : fts) {
-			if (f.getName().equals(feature2consider.getName())) {
+			if (f.getName().equals(feature2consider)) {
 				maxGainRatioFeatureValue = Double.parseDouble((String) (f
 						.getValues().get(0)));
 			}
@@ -155,7 +155,7 @@ public class GainRatio {
 
 	// Calculate the gain ratio of each partition
 	public double calculateGainRatio(double information_gain_System,
-			Feature feature2consider, String target_val,
+			String feature2consider, String target_val,
 			HashMap<Integer, WeatherData> XDataInTrain,
 			HashMap<Integer, WeatherData> YDataInTrain, int i) {
 		double calGainRatio = 0.0;
@@ -247,7 +247,7 @@ public class GainRatio {
 	}
 
 	// Returns the feature that was considered
-	public Feature getFeature() {
+	public String getFeature() {
 		return feature2consider;
 	}
 
@@ -336,14 +336,14 @@ public class GainRatio {
 	// Creating a Hash Map , with key as the key of taining data and value as
 	// the feature value
 	private HashMap<Integer, Double> getHashByAttrib(
-			HashMap<Integer, WeatherData> XDataInTrain, Feature attrb) {
+			HashMap<Integer, WeatherData> XDataInTrain, String attrb) {
 		HashMap<Integer, Double> XDataTrainAttrbMap = new HashMap<Integer, Double>();
 		for (Map.Entry<Integer, WeatherData> key_weatherData : XDataInTrain
 				.entrySet()) {
 			WeatherData wd = key_weatherData.getValue();
 			ArrayList<Feature> features = wd.getFeatures();
 			for (Feature f : features) {
-				if (f.getName().contains(attrb.getName())) {
+				if (f.getName().contains(attrb)) {
 
 					// System.out.println("The feature val"+(String)f.getValues().get(0));
 					// System.out.println("The feature name"+f.getName());
