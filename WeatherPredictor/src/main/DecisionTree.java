@@ -32,7 +32,10 @@ public class DecisionTree {
 		YtrainDataMap = readData("weatherDataTrain2",false);
 		XtestDataMap = readData("weatherDataTest",true);
 		YtestDataMap = readData("weatherDataTest",false);
-	
+	    MissingValues mv = new MissingValues();
+	    XtrainDataMap = mv.resolveMissingValue(XtrainDataMap,YtrainDataMap);
+	    XtestDataMap = mv.resolveMissingValue(XtestDataMap,YtestDataMap);
+	    
 		for(Map.Entry<Integer, WeatherData> weatherData : XtrainDataMap.entrySet())
 		{
 			WeatherData wd = weatherData.getValue();
@@ -112,7 +115,7 @@ public class DecisionTree {
 		int count_in_null = 0;
 		for(int i=0;i<actualResult.size();i++)
 		{
-			System.out.println("actualResults"+ actualResult.get(i)+"\t"+"modelResults"+ comp.get(i));
+			System.out.println(actualResult.get(i)+"\t"+ comp.get(i));
 			//System.out.println("modelResults"+ comp.get(i));
 			for(String target: all_targets)
 			{

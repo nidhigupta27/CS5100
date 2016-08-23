@@ -112,14 +112,14 @@ public class ValidateWithPruning {
 			{
 				//System.out.println("node.getLeafLabel type "+node.getType());
 				 //System.out.println("node.getLeafLabel "+node.getleafLabel());
-			}*/
+			}
 			 
 			ArrayList<String> temp = new ArrayList<String>();
 			String[] s = node.getleafLabel().split("-");
 			for (int j = 0; j < s.length; j++) {
 				//System.out.println("Inside spilt"+s[j]);
 				temp.add(s[j]);
-			}
+			}*/
 			result.put(i, node.getleafLabel());
 		}
 	}

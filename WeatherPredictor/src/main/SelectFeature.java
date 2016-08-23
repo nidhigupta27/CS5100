@@ -8,7 +8,8 @@ import java.util.Map;
 import util.Feature;
 import util.WeatherData;
 
-public class SelectFeature {
+public class SelectFeature 
+{
 	private Feature feature;
 	private HashMap<Integer, WeatherData> xTrainLeftPart;
 	private HashMap<Integer, WeatherData> xTrainRightPart;
@@ -18,17 +19,16 @@ public class SelectFeature {
 	private double maxGainRatioFeatureValue;
 	HashMap<String, HashMap<Integer, WeatherData>> ysubset;
 	HashMap<String, HashMap<Integer, WeatherData>> xsubset;
-
+//Constructor of SelectFeature to initialize the fields of SelectFeature class
 	public SelectFeature(String target_val, ArrayList<Feature> features,
 			HashMap<Integer, WeatherData> XDataInTrain,
 			HashMap<Integer, WeatherData> YDataInTrain) throws IOException {
-		feature = null;
-		gainRatio = Double.MIN_VALUE;
-		// System.out.println("the min double"+gainRatio);
-		xTrainLeftPart = null;
-		xTrainRightPart = null;
-		yTrainLeftPart = null;
-		yTrainRightPart = null;
+		    feature = null;
+		    gainRatio = Double.MIN_VALUE;
+		    xTrainLeftPart = null;
+		    xTrainRightPart = null;
+		    yTrainLeftPart = null;
+		    yTrainRightPart = null;
 		HashMap<Feature, Double> gainRatioMap = new HashMap<Feature, Double>();
 
 		// Loop through the feature list to find the feature with maximum Gain
@@ -41,8 +41,7 @@ public class SelectFeature {
 			HashMap<Integer, WeatherData> yTrainRightPartCurrent = null;
 			HashMap<String, HashMap<Integer, WeatherData>> ysubsetCurrent = null;
 			HashMap<String, HashMap<Integer, WeatherData>> xsubsetCurrent = null;
-			GainRatio gr = new GainRatio(XDataInTrain, YDataInTrain, ftr,
-					target_val);
+			GainRatio gr = new GainRatio(XDataInTrain, YDataInTrain, ftr,target_val);
 			currentGainRatio = gr.getGainRatio();
 			xTrainLeftPartCurrent = gr.getXTrainLeftPart();
 			xTrainRightPartCurrent = gr.getXTrainRightPart();
@@ -52,7 +51,8 @@ public class SelectFeature {
 			ysubsetCurrent = gr.getYSubset();
 			xsubsetCurrent = gr.getXSubset();
 			gainRatioMap.put(ftr, currentGainRatio);
-			// System.out.println("gain ratio for "+ftr.getName()+" is "+currentGainRatio);
+			
+			
 			if (currentGainRatio > gainRatio) {
 				gainRatio = currentGainRatio;
 				xTrainLeftPart = xTrainLeftPartCurrent;
@@ -64,6 +64,7 @@ public class SelectFeature {
 				feature = ftr;
 			}
 		}
+		//Calculate the number of features with Gain as zero
 		int count = 0;
 		for (Map.Entry<Feature, Double> data : gainRatioMap.entrySet()) {
 			Feature key = data.getKey();
@@ -93,46 +94,51 @@ public class SelectFeature {
 		}
 
 	}
-
+   //Get method to return feature
 	public Feature getFeature() {
 		return feature;
 	}
-
+	//Get method to return the  threshold value of feature
 	public double getMaxGainRatioFeatureValue() {
 		return maxGainRatioFeatureValue;
 	}
-
+	//Get method to return the  gain ratio of feature
 	public double getGainRatio() {
 		return gainRatio;
 	}
-
+	//Get method to return the  subset of the training data(all non categorical attributes)
+	//having feature value less than or equal to threshold
 	public HashMap<Integer, WeatherData> getXTrainLeftPart() {
 		return xTrainLeftPart;
 	}
-
+	//Get method to return the  subset of the training data(non categorical attributes)
+	//having feature value greater than threshold
 	public HashMap<Integer, WeatherData> getXTrainRightPart() {
 		return xTrainRightPart;
 	}
-
+	//Get method to return the  subset of the training data(categorical attributes)
+	//having feature value less than or equal to threshold
 	public HashMap<Integer, WeatherData> getYTrainLeftPart() {
 		return yTrainLeftPart;
 	}
-
+	//Get method to return the  subset of the training data(categorical attributes)
+	//having feature value greater than threshold
 	public HashMap<Integer, WeatherData> getYTrainRightPart() {
 		return yTrainRightPart;
 	}
-
+    
+	//Get method to return Y subset of the training data(categorical attributes)
+	
 	public HashMap<String, HashMap<Integer, WeatherData>> getYSubset() {
 		for (Map.Entry<String, HashMap<Integer, WeatherData>> data : ysubset
 				.entrySet()) {
 			String key = data.getKey();
-			// System.out.println("gjjjjjjjjjjjjjjjjjjjjjjjh "+key);
 			break;
 		}
 
 		return ysubset;
 	}
-
+	//Get method to return X subset of the training data(non categorical attributes)
 	public HashMap<String, HashMap<Integer, WeatherData>> getXSubset() {
 		return xsubset;
 	}
