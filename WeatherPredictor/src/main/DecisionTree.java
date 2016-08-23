@@ -31,6 +31,7 @@ public class DecisionTree {
 		HashMap<Integer,WeatherData> XtestDataMap = new LinkedHashMap<Integer,WeatherData>();
 		HashMap<Integer,WeatherData> YtestDataMap = new LinkedHashMap<Integer,WeatherData>();
 		HashMap<Integer,WeatherData> XrandomDataMap = new LinkedHashMap<Integer,WeatherData>();
+		
 		// read train and test data
 		XtrainDataMap = readData("weatherDataTrain.txt",true);
 		YtrainDataMap = readData("weatherDataTrain.txt",false);

@@ -80,7 +80,7 @@ public class WeatherData {
 					precp.add(feature);
 					features.add(new Feature<Object> (precp,featureNames.get(i) ));
 				}
-				// any missing value is replaced with 0
+				// any missing value is replaced with 0 here
 				else {
 					Object featureObj = feature;
 					if (feature.isEmpty())

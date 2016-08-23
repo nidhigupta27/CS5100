@@ -18,25 +18,22 @@ public class MissingValues {
 			WeatherData wd = keyWeatherData.getValue();
 			int keyInData = keyWeatherData.getKey();
 			ArrayList<Feature> featureList = wd.getFeatures();
-			for (Feature f : featureList) {
-				if (!f.getName().contains("EST")) {
+			for (Feature f : featureList) 
+			{
+				if (!f.getName().contains("EST")) 
+				{
 					String NATest = (String) f.getValues().get(0);
-					if (NATest.contains("NA")) {
+					if (NATest.contains("NA")) 
+					{
 						WeatherData wdata = YDataMap.get(keyInData);
 						ArrayList<Feature> yFeatureList = wdata.getFeatures();
-						for (Feature yf : yFeatureList) {
+						for (Feature yf : yFeatureList) 
+						{
 							String label = (String) yf.getValues().get(0);
-							System.out.println("The label and fname " + label
-									+ " " + f.getName());
+							
 							newFVal.add(getFeatureVal(label, f.getName(),
 									XDataMap, YDataMap));
-							System.out.println("th output from getFeatureVal"
-									+ newFVal);
-							// if(newFVal!=null)
-							// {
 							f.setValues(newFVal);
-							// }
-
 						}
 					}
 				}
@@ -63,8 +60,7 @@ public class MissingValues {
 						WeatherData wdata = YDataMap.get(keyInData);
 						ArrayList<Feature> yFeatureList = wdata.getFeatures();
 						for (Feature yf : yFeatureList) {
-							if (yf.getValues().contains(label)) {
-								System.out.println("missing values" + notAnNA);
+							if (yf.getValues().contains(label)) {								
 								notNAFValues = notAnNA;
 								gotFValue = true;
 							}
@@ -74,8 +70,6 @@ public class MissingValues {
 				if (gotFValue)
 					break;
 			}
-			if (gotFValue)
-				break;
 		}
 		if (notNAFValues.isEmpty()) {
 			notNAFValues = "0";
