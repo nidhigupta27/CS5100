@@ -1,6 +1,5 @@
 package main;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -20,6 +19,8 @@ public class Evaluation {
 		this.comp = comp;
 	}
 
+	// computeAccuracy() compares the actual and expected class for each target class label and 
+	// computes accuracy.
 	public double computeAccuracy() {
 		ArrayList<String> actualResult = new ArrayList<String>();
 		for(Map.Entry<Integer, WeatherData> result : YtestDataMap.entrySet()) {
@@ -48,6 +49,7 @@ public class Evaluation {
 					count_in_not_null++;
 					String[] actualResults = actualResult.get(i).split("-");
 					String[] modelResults =  comp.get(i).split("-");
+					// true positives
 					if(Arrays.asList(actualResults).contains(target) && Arrays.asList(modelResults).contains(target))
 					{
 						correct_prediction ++;

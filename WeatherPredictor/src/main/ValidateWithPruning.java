@@ -3,13 +3,11 @@ package main;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
 import util.Feature;
 import util.Node;
 import util.WeatherData;
 
+// Validate with pruning class classifies the input instances with pruned/un-pruned tree (whichever gives better accuracy)
 public class ValidateWithPruning {
 
 	ArrayList<String> features;
@@ -20,7 +18,6 @@ public class ValidateWithPruning {
 	HashMap<Integer, WeatherData> YtrainDataMap;
 
 	private Node root;
-	private double score;
 	private HashMap<Integer, String> result = new HashMap<Integer, String>();
 
 	public ValidateWithPruning(Node root,ArrayList<String> features, String target,HashMap<Integer, WeatherData> xtrainDataMap,HashMap<Integer, WeatherData> ytrainDataMap,HashMap<Integer, WeatherData> xtestDataMap2,HashMap<Integer, WeatherData> ytestDataMap2) 
@@ -34,43 +31,55 @@ public class ValidateWithPruning {
 		this.root = root;
 	}
 
+	// validateAfterPrune() classifies the given test instances and return the result
 	public HashMap<Integer, String> validateAfterPrune() throws IOException 
 	{	
+		// classifies the given test data using un-pruned tree
 		mine();
 		result = validate();	
 		PostTreePruning ptp = new PostTreePruning(XtestDataMap,YtestDataMap, XtestDataMap, result, target);
+		// do pruning and see if it is giving better accuracy
+		// returns the root node of pruned/un-pruned tree accordingly
 		Node newRoot = ptp.execute(root, XtestDataMap);
 		root = newRoot;
-		//DisplayTree dt = new DisplayTree();
-		//dt.printTree(root,target);
 		mine();
+		// result from pruned tree
 		result = validate();
 		return result;
 	}
 
+	// returns the result
 	public HashMap<Integer, String> validate() {
-		int correct = 0;
 		HashMap<Integer, String> res = getResult();
 		return res;		
 	}
 
+	// classifies and returns the result
 	public HashMap<Integer, String> getResult() {
 		mine();
 		return result;
 	}
 
+	// returns current root
 	public Node getRoot(){
 		return this.root;
 	}
 
+	// mine() traverses the given tree (with root node as root) for the given input test instance
+	// and finds a label for that instance.
+	// Traversal is done by comparing node feature with feature value of test instance
+	// Then chose to move left or right depending on if the feature value is less(left) or greater
+	// than node threshold value for that feature
 	public void mine() {
 		for (int i = 0; i < XtestDataMap.size(); i++) {
 			Node node = root;
 			WeatherData currInstance = XtestDataMap.get(i);
 			String value = null;
 			while (!node.getType().equals("leaf")) {
+				// node feature
 				String attributeName = node.getFeature();
 				ArrayList<Feature> attributeValuePairs = currInstance.getFeatures();
+				// get the corresponding feature value of test instance
 				for (Feature f : attributeValuePairs) 
 				{
 					if (f.getName().contains(attributeName)) 
@@ -84,6 +93,7 @@ public class ValidateWithPruning {
 				for (String s : children.keySet()) 
 				{
 					String threshold = s.substring(4);
+					// traverses left or right by comparing node feature value and feature value of current instance
 					if (Double.parseDouble(value) <= Double
 							.parseDouble(threshold)) 
 					{
@@ -106,6 +116,7 @@ public class ValidateWithPruning {
 			for (int j = 0; j < s.length; j++) {
 				temp.add(s[j]);
 			}
+			// result set is updated here
 			result.put(i, node.getleafLabel());
 		}
 	}

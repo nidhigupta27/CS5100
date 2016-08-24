@@ -1,34 +1,27 @@
 package main;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Scanner;
-
 import util.WeatherData;
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
-import weka.classifiers.evaluation.NominalPrediction;
-import weka.classifiers.rules.DecisionTable;
-import weka.classifiers.rules.OneR;
-import weka.classifiers.rules.PART;
-import weka.classifiers.trees.DecisionStump;
 import weka.classifiers.trees.J48;
-import weka.core.FastVector;
 import weka.core.Instances;
 
+// trains and classifies input data using Weka J48
 public class J48Decision {
 	static ArrayList<String> targets = null;
 	HashMap<Integer,WeatherData> YtestDataMap = null;
+	// constructor
+	// initializes list of target class and actual test classification
 	public J48Decision(ArrayList<String> targets,HashMap<Integer,WeatherData> YtestDataMap){
 		this.targets = targets;
 		this.YtestDataMap = YtestDataMap;
 	}
 
+	// readDataFile() reads the input file
 	public static BufferedReader readDataFile(String filename) {
 		BufferedReader inputReader = null;
 		try {
@@ -40,6 +33,7 @@ public class J48Decision {
 		return inputReader;
 	}
 
+	// evalute() function trains J48 modal with train data and then predicts output class for all test data 
 	public double evaluate() {
 		double startTime =0.0;
 		HashMap<String,ArrayList<String>> predictedOutput = new HashMap<String,ArrayList<String>>();
@@ -50,6 +44,7 @@ public class J48Decision {
 			BufferedReader datafile = null;
 			BufferedReader testfile = null;
 			try {
+				// reads all the file
 				if(target.contains("Fog")){
 					datafile = readDataFile("fogTrain.arff");
 					testfile = readDataFile("fogTest.arff"); 
@@ -73,7 +68,7 @@ public class J48Decision {
 				test.setClassIndex(data.numAttributes()-1);
 				startTime = System.currentTimeMillis();
 				Classifier cls = new J48();
-
+				// creates the classifier
 				cls.buildClassifier(data);
 				for (int j = 0; j < test.numInstances(); j++) {
 					double clsLabel = cls.classifyInstance(test.instance(j));
@@ -84,6 +79,7 @@ public class J48Decision {
 						individualPred.put(j,"");
 					}
 				}
+				// convert to classname-classname format
 				for(Map.Entry<Integer, String> result : individualPred.entrySet()) {
 					String wd = result.getValue();
 					if(comp.containsKey(i)){
@@ -108,6 +104,7 @@ public class J48Decision {
 		double endTime = System.currentTimeMillis();
 		System.out.println("Time for training and testing Weka J48 "+(endTime-startTime)/(1000*60));
 		main.Evaluation eval = new main.Evaluation(YtestDataMap,targets,comp);
+		// evaluates accuracy of the classified data
 		return eval.computeAccuracy();	
 	}
 }

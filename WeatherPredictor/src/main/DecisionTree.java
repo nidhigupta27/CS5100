@@ -9,40 +9,54 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
-
-import util.Feature;
 import util.Node;
 import util.WeatherData;
 
+// main file. Execution starts from here.
 public class DecisionTree {
 
+	// stores all target classes
 	static ArrayList<String> targets = new ArrayList<String>();
+	// stores list of all features
 	static private ArrayList<String> featureSet = null;
+	// used to combine result in Classname-Classname format
 	static HashMap<Integer,String> comp = new HashMap<Integer,String>();
+	static String outputFileName = null;
 
 	public static void main(String args[]) throws Exception {
-		// add all predictions to targets ArrayList (Rain,Snow,Fog,Thunderstorm)
+		// add all class label to targets ArrayList (Rain,Snow,Fog,Thunderstorm)
 		updateTarget();
 
-		ArrayList<Feature> features = new ArrayList<Feature>();
+		// stores the tree root of all the classed
 		HashMap<String,Node> rootForClasses = new HashMap<String,Node>();
+		// stores feature set for train data
 		HashMap<Integer,WeatherData> XtrainDataMap = new LinkedHashMap<Integer,WeatherData>();
+		// stores class labels for train data
 		HashMap<Integer,WeatherData> YtrainDataMap= new LinkedHashMap<Integer,WeatherData>();
+		// stores feature set for test data
 		HashMap<Integer,WeatherData> XtestDataMap = new LinkedHashMap<Integer,WeatherData>();
+		// stores actual class labels for test data
 		HashMap<Integer,WeatherData> YtestDataMap = new LinkedHashMap<Integer,WeatherData>();
+		// stores feature set for random data yet to be classified
 		HashMap<Integer,WeatherData> XrandomDataMap = new LinkedHashMap<Integer,WeatherData>();
-		
-		// read train and test data
-		XtrainDataMap = readData("weatherDataTrain.txt",true);
-		YtrainDataMap = readData("weatherDataTrain.txt",false);
-		XtestDataMap = readData("weatherDataTest.txt",true);
-		YtestDataMap = readData("weatherDataTest.txt",false);
-		//read random data
-		XrandomDataMap = readData("randomData.csv",true);
-		// create a decision tree model of each class and classify test data
+
+		// read train, test and random data
+		String trainfileName =args[0];
+		String testfileName = args[1];
+		String classifyfileName= args[2];
+		outputFileName = args[3];
+		XtrainDataMap = readData(trainfileName,true);
+		YtrainDataMap = readData(trainfileName,false);
+		XtestDataMap = readData(testfileName,true);
+		YtestDataMap = readData(testfileName,false);
+		XrandomDataMap = readData(classifyfileName,true);
+
 		System.out.println("x train map size "+XtrainDataMap.size());
 		System.out.println("y test map size "+YtestDataMap.size());
+		System.out.println("random data size "+XrandomDataMap.size());
+		// stores current time
 		double startTime = System.currentTimeMillis();
+		// create a decision tree model of each class and classify test data
 		for (String target : targets) {
 			try {
 				int i = 0;
@@ -50,20 +64,24 @@ public class DecisionTree {
 				GrowTree tree = new GrowTree(featureSet, target, XtrainDataMap,
 						YtrainDataMap);
 				System.out.println("calling tree construct for "+target);
+				// constructs the tree and return root node of created tree
 				Node root = tree.construct();
 				System.out.println("tree created successfully for "+target);
 				ValidateWithPruning vwp = new ValidateWithPruning(root,
 						featureSet, target, XtrainDataMap,YtrainDataMap,XtestDataMap, YtestDataMap);
 				HashMap<Integer, String> res = vwp.validateAfterPrune();
+				// returns root node of pruned tree
 				Node prunedRoot = vwp.getRoot();
+				// stores all the root node all classes
 				rootForClasses.put(target, prunedRoot);
+				// format the result to classname-classname format
 				formatResult(res,i);
-
 			}
 			catch (Exception e) {
 				System.out.println(e.getMessage());
 			}
 		}
+		// stores current end
 		double endTime = System.currentTimeMillis();
 
 		// Evaluation of the result
@@ -72,6 +90,7 @@ public class DecisionTree {
 
 		// J48 CLASSIFIER
 		J48Decision  J48= new J48Decision(targets,YtestDataMap);
+		// classifies test data using Weka J48 Classifier
 		double J48_accuracy = J48.evaluate();
 		System.out.println("Accuracy of Weka J48 Implementation = "+J48_accuracy);
 		System.out.println("Accuracy of C4.5 Implementation = "+accuracy);
@@ -95,13 +114,15 @@ public class DecisionTree {
 			HashMap<Integer, String> res = vwp.getResult();	
 			formatResult(res,i);
 		}		
+		// writes the result of classifying random data to a text file
 		writeResultToFile(XrandomDataMap);
 		System.out.println("Random data is classified successfully and written to file");
 	}
 
+	// writeResultToFile() takes feature set of random datas to be classified and write them to output.txt file
 	public static void writeResultToFile(HashMap<Integer,WeatherData> XrandomDataMap){
 		try{
-			PrintWriter out = new PrintWriter("output.txt");
+			PrintWriter out = new PrintWriter(outputFileName);
 			out.println("Sl.no \t| Events ");
 			TreeMap<Integer,String> sorted_map = new TreeMap<Integer,String>(comp);
 			int i=0;
@@ -185,7 +206,7 @@ public class DecisionTree {
 		return data;
 	}	
 
-	// adds all the feature name to featureSet
+	// adds all the feature name to featureSet.
 	public static void addFeatureNames(String names) {
 		featureSet = new ArrayList<String>();
 		String[] tempNames= names.split(",");
@@ -195,6 +216,7 @@ public class DecisionTree {
 		}
 	}
 
+	// adds all the target classes to targets.
 	public static void updateTarget() {
 		targets.add("Fog");
 		targets.add("Rain");
